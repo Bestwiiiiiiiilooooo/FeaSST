@@ -5,6 +5,7 @@ import axios from 'axios';
 import { assets, url, currency } from '../../assets/assets';
 import dayjs from 'dayjs';
 import { useLanguage } from '../../LanguageContext';
+import CustomDropdown from '../../components/CustomDropdown/CustomDropdown';
 
 const STALLS = [
   { id: 'Store 1', name: 'Store 1' },
@@ -136,11 +137,20 @@ const Order = () => {
               <p className='order-number'>{t('orderNo')} {order.orderNumber}</p>
               <p className='order-item-food'>
                 {order.items.map((item, index) => {
-                  if (index === order.items.length - 1) {
-                    return item.name + " x " + item.quantity
+                  let itemText = item.name;
+                  
+                  // Add side dishes information if present
+                  if (item.sideDishes && item.sideDishes.length > 0) {
+                    const sideDishNames = item.sideDishes.map(sd => sd.name).join(', ');
+                    itemText += ` (with ${sideDishNames})`;
                   }
-                  else {
-                    return item.name + " x " + item.quantity + ", "
+                  
+                  itemText += ` x ${item.quantity}`;
+                  
+                  if (index === order.items.length - 1) {
+                    return itemText;
+                  } else {
+                    return itemText + ", ";
                   }
                 })}
               </p>
@@ -155,14 +165,18 @@ const Order = () => {
             </div>
             <p>{t('items')}: {order.items.length}</p>
             <p>{currency}{order.amount}</p>
-            <select onChange={(e) => statusHandler(e, order._id)} value={order.status} name="" id="">
-              <option value="Food Processing">Food Processing</option>
-              <option value="Ready to Collect">Ready to Collect</option>
-              <option value="Rejected">Rejected</option>
-            </select>
-            {(order.status === 'Ready to Collect' || order.status === 'Rejected') && getCountdown(order) > 0 && (
-              <p style={{ color: 'tomato', fontWeight: 'bold' }}>Disappearing in {getCountdown(order)}s</p>
-            )}
+            <div className="order-status-container">
+              <CustomDropdown
+                options={["Food Processing", "Ready to Collect", "Rejected"]}
+                value={order.status}
+                onChange={(newStatus) => statusHandler({ target: { value: newStatus } }, order._id)}
+              />
+              {(order.status === 'Ready to Collect' || order.status === 'Rejected') && getCountdown(order) > 0 && (
+                <p className="disappearing-msg" style={{ color: 'tomato', fontWeight: 'bold', marginLeft: 8 }}>
+                  Disappearing in {getCountdown(order)}s
+                </p>
+              )}
+            </div>
             <button className='order-clear-btn' onClick={() => deleteOrder(order._id)}>{t('remove')}</button>
           </div>
         ))}

@@ -41,6 +41,8 @@ const List = () => {
 
   useEffect(() => {
     fetchList();
+    const interval = setInterval(fetchList, 10000); // Refresh every 10 seconds
+    return () => clearInterval(interval);
   }, [])
 
   useEffect(() => {
@@ -69,6 +71,7 @@ const List = () => {
           <b>{t('productName') || 'Name'}</b>
           <b>{t('storeNumber') || 'Category'}</b>
           <b>{t('price') || 'Price'}</b>
+          <b>{t('promoCode') || 'Promo Code'}</b>
           <b>{t('action') || 'Action'}</b>
         </div>
         {list
@@ -80,6 +83,22 @@ const List = () => {
                 <p>{item.name}</p>
                 <p>{item.category}</p>
                 <p>{currency}{item.price}</p>
+                <p>
+                  {item.promoCode ? (
+                    <span>
+                      <strong>{item.promoCode}</strong>
+                      {item.promoDiscount && (
+                        <span style={{ color: '#28a745', fontSize: '0.9em' }}>
+                          {' '}(-{item.promoDiscount}%)
+                        </span>
+                      )}
+                    </span>
+                  ) : (
+                    <span style={{ color: '#6c757d', fontStyle: 'italic' }}>
+                      {t('noPromoCode') || 'No promo code'}
+                    </span>
+                  )}
+                </p>
                 <p className='cursor' onClick={() => removeFood(item._id)}>{t('remove')}</p>
               </div>
             )

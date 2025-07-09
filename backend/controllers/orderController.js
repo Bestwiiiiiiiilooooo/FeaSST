@@ -42,16 +42,24 @@ const placeOrder = async (req, res) => {
         await newOrder.save();
         await userModel.findByIdAndUpdate(req.body.userId, { cartData: {} });
 
-        const line_items = req.body.items.map((item) => ({
-            price_data: {
-                currency: currency,
-                product_data: {
-                    name: item.name
+        const line_items = req.body.items.map((item) => {
+            // Use totalPrice if available (includes side dishes), otherwise use base price
+            const unitPrice = item.totalPrice || item.price;
+            const itemName = item.sideDishes && item.sideDishes.length > 0 
+                ? `${item.name} (with ${item.sideDishes.map(sd => sd.name).join(', ')})`
+                : item.name;
+            
+            return {
+                price_data: {
+                    currency: currency,
+                    product_data: {
+                        name: itemName
+                    },
+                    unit_amount: Math.round(unitPrice * 100)
                 },
-                unit_amount: item.price * 100 
-            },
-            quantity: item.quantity
-        }))
+                quantity: item.quantity
+            };
+        })
 
         const session = await stripe.checkout.sessions.create({
             success_url: `${frontend_URL}/verify?success=true&orderId=${newOrder._id}`,

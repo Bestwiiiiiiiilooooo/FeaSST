@@ -19,6 +19,21 @@ const addFood = async (req, res) => {
     try {
         let image_filename = `${req.file.filename}`
 
+        // Parse side dishes if provided
+        let sideDishes = [];
+        if (req.body.sideDishes) {
+            try {
+                sideDishes = JSON.parse(req.body.sideDishes);
+                // Ensure all side dish prices are numbers
+                sideDishes = sideDishes.map(dish => ({
+                    ...dish,
+                    price: Number(dish.price)
+                }));
+            } catch (e) {
+                console.log('Error parsing side dishes:', e);
+            }
+        }
+
         const food = new foodModel({
             name: req.body.name,
             description: req.body.description,
@@ -27,6 +42,7 @@ const addFood = async (req, res) => {
             image: image_filename,
             promoCode: req.body.promoCode,
             promoDiscount: req.body.promoDiscount,
+            sideDishes: sideDishes,
         })
 
         await food.save();
