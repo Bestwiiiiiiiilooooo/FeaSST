@@ -8,7 +8,6 @@ import axios from 'axios';
 
 const PlaceOrder = () => {
 
-    const [payment, setPayment] = useState("cod")
     const [data, setData] = useState({
         name: "",
         class: "",
@@ -35,13 +34,44 @@ const PlaceOrder = () => {
     const placeOrder = async (e) => {
         e.preventDefault()
         let orderItems = [];
-        food_list.map(((item) => {
-            if (cartItems[item._id] > 0) {
-                let itemInfo = item;
-                itemInfo["quantity"] = cartItems[item._id];
-                orderItems.push(itemInfo)
+        
+        // Process cart items with side dishes
+        Object.entries(cartItems).forEach(([cartKey, quantity]) => {
+            if (quantity > 0) {
+                // Extract itemId from cartKey (remove side dishes part if present)
+                const itemId = cartKey.includes('_') ? cartKey.split('_')[0] : cartKey;
+                const item = food_list.find(food => food._id === itemId);
+                
+                if (item) {
+                    let itemInfo = { ...item };
+                    itemInfo.quantity = quantity;
+                    
+                    // Parse side dishes if present
+                    if (cartKey.includes('_')) {
+                        try {
+                            // Find the first underscore and get everything after it
+                            const underscoreIndex = cartKey.indexOf('_');
+                            const encodedSideDishes = cartKey.substring(underscoreIndex + 1);
+                            const sideDishesJson = atob(encodedSideDishes); // Base64 decode
+                            const sideDishes = JSON.parse(sideDishesJson);
+                            itemInfo.sideDishes = sideDishes;
+                            // Calculate total price including side dishes
+                            const sideDishesTotal = sideDishes.reduce((sum, sd) => sum + sd.price, 0);
+                            itemInfo.totalPrice = item.price + sideDishesTotal;
+                        } catch (e) {
+                            console.error('Error parsing side dishes:', e);
+                            console.error('CartKey:', cartKey);
+                            console.error('Attempted to parse:', cartKey.split('_')[1]);
+                            itemInfo.totalPrice = item.price;
+                        }
+                    } else {
+                        itemInfo.totalPrice = item.price;
+                    }
+                    
+                    orderItems.push(itemInfo);
+                }
             }
-        }))
+        });
         // Group items by store/category
         const itemsByStore = {};
         orderItems.forEach(item => {
@@ -54,18 +84,13 @@ const PlaceOrder = () => {
                 userId,
                 address: data,
                 items,
-                amount: items.reduce((sum, item) => sum + item.price * item.quantity, 0),
+                amount: items.reduce((sum, item) => sum + (item.totalPrice || item.price) * item.quantity, 0),
                 stallId: store,
                 orderDate,
             };
             try {
-                if (payment === "stripe") {
-                    let response = await axios.post(url + "/api/order/place", orderData, { headers: { Authorization: `Bearer ${token}` } });
-                    return { store, success: response.data.success, message: response.data.success ? 'Stripe order placed' : response.data.message };
-                } else {
-                    let response = await axios.post(url + "/api/order/placecod", orderData, { headers: { Authorization: `Bearer ${token}` } });
-                    return { store, success: response.data.success, message: response.data.message };
-                }
+                let response = await axios.post(url + "/api/order/place", orderData, { headers: { Authorization: `Bearer ${token}` } });
+                return { store, success: response.data.success, message: response.data.message };
             } catch (err) {
                 return { store, success: false, message: err.message };
             }
@@ -128,6 +153,59 @@ const PlaceOrder = () => {
             <div className="place-order-right">
                 <div className="cart-total">
                     <h2>Cart Totals</h2>
+                    
+                    {/* Order Items List */}
+                    <div className="order-items-list">
+                        {Object.entries(cartItems).map(([cartKey, quantity]) => {
+                            if (quantity > 0) {
+                                const itemId = cartKey.includes('_') ? cartKey.split('_')[0] : cartKey;
+                                const item = food_list.find(food => food._id === itemId);
+                                
+                                if (item) {
+                                    let sideDishes = [];
+                                    let totalPrice = item.price;
+                                    
+                                    // Parse side dishes if present
+                                    if (cartKey.includes('_')) {
+                                        try {
+                                            const underscoreIndex = cartKey.indexOf('_');
+                                            const encodedSideDishes = cartKey.substring(underscoreIndex + 1);
+                                            const sideDishesJson = atob(encodedSideDishes);
+                                            sideDishes = JSON.parse(sideDishesJson);
+                                            const sideDishesTotal = sideDishes.reduce((sum, sd) => sum + sd.price, 0);
+                                            totalPrice = item.price + sideDishesTotal;
+                                        } catch (e) {
+                                            console.error('Error parsing side dishes:', e);
+                                        }
+                                    }
+                                    
+                                    return (
+                                        <div key={cartKey} className="order-item">
+                                            <div className="order-item-details">
+                                                <div className="order-item-name">{item.name}</div>
+                                                {sideDishes.length > 0 && (
+                                                    <div className="order-item-side-dishes">
+                                                        <div className="order-item-side-dishes-label">Side Dishes:</div>
+                                                        {sideDishes.map((sideDish, index) => (
+                                                            <span key={index} className="order-item-side-dish">
+                                                                {sideDish.name} (+{currency}{sideDish.price})
+                                                            </span>
+                                                        ))}
+                                                    </div>
+                                                )}
+                                            </div>
+                                            <div className="order-item-price">
+                                                {currency}{totalPrice}
+                                                <span className="order-item-quantity">× {quantity}</span>
+                                            </div>
+                                        </div>
+                                    );
+                                }
+                            }
+                            return null;
+                        })}
+                    </div>
+                    
                     <div>
                         <div className="cart-total-details"><p>Subtotal</p><p>{currency}{getTotalCartAmount()}</p></div>
                         <hr />
@@ -136,16 +214,11 @@ const PlaceOrder = () => {
                 </div>
                 <div className="payment">
                     <h2>Payment Method</h2>
-                    <div onClick={() => setPayment("cod")} className="payment-option">
-                        <img src={payment === "cod" ? assets.checked : assets.un_checked} alt="" />
-                        <p>COD ( Cash on delivery )</p>
-                    </div>
-                    <div onClick={() => setPayment("stripe")} className="payment-option">
-                        <img src={payment === "stripe" ? assets.checked : assets.un_checked} alt="" />
-                        <p>Stripe ( Credit / Debit )</p>
+                    <div className="payment-option-static">
+                        <p>Cash on Delivery</p>
                     </div>
                 </div>
-                <button className='place-order-submit' type='submit'>{payment==="cod"?"Place Order":"Proceed To Payment"}</button>
+                <button className='place-order-submit' type='submit'>Place Order</button>
             </div>
         </form>
     )

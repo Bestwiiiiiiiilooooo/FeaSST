@@ -1,12 +1,8 @@
 import orderModel from "../models/orderModel.js";
 import userModel from "../models/userModel.js"
-import Stripe from "stripe";
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 //config variables
-const currency = "usd";
 const deliveryCharge = 5;
-const frontend_URL = 'http://localhost:5173';
 
 // Helper to generate a unique 3-digit order number
 async function generateUniqueOrderNumber() {
@@ -19,7 +15,7 @@ async function generateUniqueOrderNumber() {
   return orderNumber;
 }
 
-// Placing User Order for Frontend using stripe
+// Placing User Order for Frontend using COD
 const placeOrder = async (req, res) => {
     try {
         // Only allow orders for the next day
@@ -35,6 +31,7 @@ const placeOrder = async (req, res) => {
             items: req.body.items,
             amount: req.body.amount,
             address: req.body.address,
+            payment: true,
             orderNumber,
             stallId: req.body.stallId,
             collectedDate: orderDate,
@@ -42,25 +39,7 @@ const placeOrder = async (req, res) => {
         await newOrder.save();
         await userModel.findByIdAndUpdate(req.body.userId, { cartData: {} });
 
-        const line_items = req.body.items.map((item) => ({
-            price_data: {
-                currency: currency,
-                product_data: {
-                    name: item.name
-                },
-                unit_amount: item.price * 100 
-            },
-            quantity: item.quantity
-        }))
-
-        const session = await stripe.checkout.sessions.create({
-            success_url: `${frontend_URL}/verify?success=true&orderId=${newOrder._id}`,
-            cancel_url: `${frontend_URL}/verify?success=false&orderId=${newOrder._id}`,
-            line_items: line_items,
-            mode: 'payment',
-        });
-
-        res.json({ success: true, session_url: session.url });
+        res.json({ success: true, message: "Order Placed" });
 
     } catch (error) {
         console.log(error);
@@ -68,7 +47,7 @@ const placeOrder = async (req, res) => {
     }
 }
 
-// Placing User Order for Frontend using stripe
+// Placing User Order for Frontend using COD (keeping for backward compatibility)
 const placeOrderCod = async (req, res) => {
     try {
         // Only allow orders for the next day

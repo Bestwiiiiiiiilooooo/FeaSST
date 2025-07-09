@@ -13,11 +13,16 @@ const Cart = () => {
 
   const checkPromo = () => {
     // Find if any item in the cart has a matching promoCode
-    const hasValidPromo = food_list.some(item =>
-      cartItems[item._id] > 0 &&
-      item.promoCode &&
-      item.promoCode.trim().toLowerCase() === promoInput.trim().toLowerCase()
-    );
+    const hasValidPromo = food_list.some(item => {
+      // Check if this item exists in cart (with or without side dishes)
+      const itemInCart = Object.entries(cartItems).some(([cartKey, quantity]) => {
+        const itemId = cartKey.includes('_') ? cartKey.split('_')[0] : cartKey;
+        return itemId === item._id && quantity > 0;
+      });
+      
+      return itemInCart && item.promoCode && 
+             item.promoCode.trim().toLowerCase() === promoInput.trim().toLowerCase();
+    });
     setPromoStatus(hasValidPromo ? "Valid" : "Not valid");
   };
 
@@ -25,14 +30,41 @@ const Cart = () => {
   let promoDiscountAmount = 0;
   if (promoStatus === 'Valid') {
     // Find all items in cart with matching promo code
-    const matchingItems = food_list.filter(item =>
-      cartItems[item._id] > 0 &&
-      item.promoCode &&
-      item.promoCode.trim().toLowerCase() === promoInput.trim().toLowerCase()
-    );
+    const matchingItems = food_list.filter(item => {
+      // Check if this item exists in cart (with or without side dishes)
+      const itemInCart = Object.entries(cartItems).some(([cartKey, quantity]) => {
+        const itemId = cartKey.includes('_') ? cartKey.split('_')[0] : cartKey;
+        return itemId === item._id && quantity > 0;
+      });
+      
+      return itemInCart && item.promoCode && 
+             item.promoCode.trim().toLowerCase() === promoInput.trim().toLowerCase();
+    });
+    
     // Apply the highest discount among matching items
     promoDiscountAmount = Math.max(...matchingItems.map(item => {
-      const itemTotal = item.price * cartItems[item._id];
+      // Calculate total for this item including all cart entries (with side dishes)
+      let itemTotal = 0;
+      Object.entries(cartItems).forEach(([cartKey, quantity]) => {
+        const itemId = cartKey.includes('_') ? cartKey.split('_')[0] : cartKey;
+        if (itemId === item._id && quantity > 0) {
+          let entryTotal = item.price;
+          
+          // Add side dishes price if present
+          if (cartKey.includes('_')) {
+            try {
+              const sideDishes = JSON.parse(cartKey.split('_')[1]);
+              const sideDishesTotal = sideDishes.reduce((sum, sd) => sum + sd.price, 0);
+              entryTotal += sideDishesTotal;
+            } catch (e) {
+              console.error('Error parsing side dishes:', e);
+            }
+          }
+          
+          itemTotal += entryTotal * quantity;
+        }
+      });
+      
       return item.promoDiscount ? (itemTotal * (item.promoDiscount / 100)) : 0;
     }), 0);
   }
@@ -48,19 +80,58 @@ const Cart = () => {
         <br />
         <hr />
         {food_list.map((item, index) => {
-          if (cartItems[item._id]>0) {
-            return (<div key={index}>
-              <div className="cart-items-title cart-items-item">
-                <img src={url+"/images/"+item.image} alt="" />
-                <p>{item.name}</p>
-                <p>{currency}{item.price}</p>
-                <div>{cartItems[item._id]}</div>
-                <p>{currency}{item.price*cartItems[item._id]}</p>
-                <p className='cart-items-remove-icon' onClick={()=>removeFromCart(item._id)}>x</p>
+          // Find all cart entries for this item (with different side dishes)
+          const itemCartEntries = Object.entries(cartItems).filter(([cartKey, quantity]) => {
+            const itemId = cartKey.includes('_') ? cartKey.split('_')[0] : cartKey;
+            return itemId === item._id && quantity > 0;
+          });
+
+          return itemCartEntries.map(([cartKey, quantity], entryIndex) => {
+            let sideDishes = [];
+            let itemTotal = item.price;
+            
+            // Parse side dishes if present
+            if (cartKey.includes('_')) {
+              try {
+                // Find the first underscore and get everything after it
+                const underscoreIndex = cartKey.indexOf('_');
+                const encodedSideDishes = cartKey.substring(underscoreIndex + 1);
+                const sideDishesJson = atob(encodedSideDishes); // Base64 decode
+                sideDishes = JSON.parse(sideDishesJson);
+                const sideDishesTotal = sideDishes.reduce((sum, sd) => sum + sd.price, 0);
+                itemTotal += sideDishesTotal;
+              } catch (e) {
+                console.error('Error parsing side dishes:', e);
+                console.error('CartKey:', cartKey);
+                console.error('Attempted to parse:', cartKey.split('_')[1]);
+              }
+            }
+
+            return (
+              <div key={`${index}-${entryIndex}`}>
+                <div className="cart-items-title cart-items-item">
+                  <img src={url+"/images/"+item.image} alt="" />
+                  <div className="item-details">
+                    <p className="item-name">{item.name}</p>
+                    {sideDishes.length > 0 && (
+                      <div className="side-dishes-list">
+                        {sideDishes.map((sd, sdIndex) => (
+                          <span key={sdIndex} className="side-dish-tag">
+                            {sd.name} (+{currency}{sd.price})
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                  <p>{currency}{item.price}</p>
+                  <div>{quantity}</div>
+                  <p>{currency}{itemTotal * quantity}</p>
+                  <p className='cart-items-remove-icon' onClick={()=>removeFromCart(cartKey)}>x</p>
+                </div>
+                <hr />
               </div>
-              <hr />
-            </div>)
-          }
+            );
+          });
         })}
       </div>
       <div className="cart-bottom">

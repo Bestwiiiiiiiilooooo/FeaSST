@@ -17,6 +17,12 @@ const Add = () => {
         promoCode: "",
         promoDiscount: ""
     });
+    const [sideDishes, setSideDishes] = useState([]);
+    const [newSideDish, setNewSideDish] = useState({
+        name: "",
+        price: "",
+        description: ""
+    });
 
     const onSubmitHandler = async (event) => {
         event.preventDefault();
@@ -34,6 +40,7 @@ const Add = () => {
         formData.append("image", image);
         formData.append("promoCode", data.promoCode);
         formData.append("promoDiscount", data.promoDiscount);
+        formData.append("sideDishes", JSON.stringify(sideDishes));
         const response = await axios.post(`${url}/api/food/add`, formData);
         if (response.data.success) {
             toast.success(response.data.message)
@@ -46,6 +53,7 @@ const Add = () => {
                 promoDiscount: ""
             })
             setImage(false);
+            setSideDishes([]);
         }
         else {
             toast.error(response.data.message)
@@ -103,6 +111,60 @@ const Add = () => {
                     <p>{t('promoDiscountLabel') || 'Promo Discount (%) (optional)'}</p>
                     <input name='promoDiscount' onChange={onChangeHandler} value={data.promoDiscount} type="number" min="0" max="100" placeholder={t('promoDiscountPlaceholder') || 'e.g. 10'} />
                 </div>
+                
+                <div className='add-side-dishes flex-col'>
+                    <p>Side Dishes (optional)</p>
+                    <div className='side-dishes-container'>
+                        {sideDishes.map((dish, index) => (
+                            <div key={index} className='side-dish-item'>
+                                <span>{dish.name} - ${dish.price}</span>
+                                <button 
+                                    type="button" 
+                                    onClick={() => setSideDishes(sideDishes.filter((_, i) => i !== index))}
+                                    className='remove-side-dish'
+                                >
+                                    ×
+                                </button>
+                            </div>
+                        ))}
+                        <div className='add-side-dish-form'>
+                            <input 
+                                type="text" 
+                                placeholder="Side dish name" 
+                                value={newSideDish.name}
+                                onChange={(e) => setNewSideDish({...newSideDish, name: e.target.value})}
+                            />
+                            <input 
+                                type="number" 
+                                placeholder="Price" 
+                                value={newSideDish.price}
+                                onChange={(e) => setNewSideDish({...newSideDish, price: e.target.value})}
+                            />
+                            <input 
+                                type="text" 
+                                placeholder="Description (optional)" 
+                                value={newSideDish.description}
+                                onChange={(e) => setNewSideDish({...newSideDish, description: e.target.value})}
+                            />
+                            <button 
+                                type="button" 
+                                onClick={() => {
+                                    if (newSideDish.name && newSideDish.price) {
+                                        setSideDishes([...sideDishes, {
+                                            ...newSideDish,
+                                            price: Number(newSideDish.price) // Convert to number
+                                        }]);
+                                        setNewSideDish({name: "", price: "", description: ""});
+                                    }
+                                }}
+                                className='add-side-dish-btn'
+                            >
+                                Add Side Dish
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
                 <button type='submit' className='add-btn' >{t('addItem')}</button>
             </form>
         </div>

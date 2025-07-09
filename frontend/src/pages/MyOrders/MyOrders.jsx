@@ -48,13 +48,21 @@ const MyOrders = () => {
                 <p className='order-number'>Order No: {order.orderNumber}</p>
                 <p className='collection-date'><b>Collection Date:</b> {order.collectedDate ? order.collectedDate.slice(0, 10) : 'N/A'}</p>
                 <p>{order.items.map((item,index)=>{
-                  if (index === order.items.length-1) {
-                    return item.name+" x "+item.quantity
-                  }
-                  else{
-                    return item.name+" x "+item.quantity+", "
+                  let itemText = item.name;
+                  
+                  // Add side dishes information if present
+                  if (item.sideDishes && item.sideDishes.length > 0) {
+                    const sideDishNames = item.sideDishes.map(sd => sd.name).join(', ');
+                    itemText += ` (with ${sideDishNames})`;
                   }
                   
+                  itemText += ` x ${item.quantity}`;
+                  
+                  if (index === order.items.length-1) {
+                    return itemText;
+                  } else {
+                    return itemText + ", ";
+                  }
                 })}</p>
                 <p>{currency}{order.amount}.00</p>
                 <p>Items: {order.items.length}</p>

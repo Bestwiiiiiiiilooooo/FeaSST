@@ -1,23 +1,47 @@
-import React, { useContext, useState } from 'react'
+import React, { useContext, useState, useMemo, useCallback } from 'react'
+import { createPortal } from 'react-dom'
 import './FoodItem.css'
 import { assets } from '../../assets/assets'
 import { StoreContext } from '../../Context/StoreContext';
+import SideDishesPopup from '../SideDishesPopup/SideDishesPopup';
 
-const FoodItem = ({ image, name, price, desc , id }) => {
+const FoodItem = ({ image, name, price, desc, id, sideDishes }) => {
 
-    const [itemCount, setItemCount] = useState(0);
+    const [showSideDishesPopup, setShowSideDishesPopup] = useState(false);
     const {cartItems,addToCart,removeFromCart,url,currency} = useContext(StoreContext);
+
+    const handleAddToCart = useCallback((food, selectedSideDishes) => {
+        addToCart(id, selectedSideDishes);
+    }, [addToCart, id]);
+
+    const cartKey = useMemo(() => {
+        // Check if this item exists in cart with any side dishes combination
+        for (const key in cartItems) {
+            if (key.startsWith(id)) {
+                return key;
+            }
+        }
+        return null;
+    }, [cartItems, id]);
+
+    const cartQuantity = useMemo(() => {
+        return cartKey ? cartItems[cartKey] : 0;
+    }, [cartKey, cartItems]);
+
+    const handleClosePopup = useCallback(() => {
+        setShowSideDishesPopup(false);
+    }, []);
 
     return (
         <div className='food-item'>
             <div className='food-item-img-container'>
                 <img className='food-item-image' src={url+"/images/"+image} alt="" />
-                {!cartItems[id]
-                ?<img className='add' onClick={() => addToCart(id)} src={assets.add_icon_white} alt="" />
+                {!cartQuantity
+                ?<img className='add' onClick={() => setShowSideDishesPopup(true)} src={assets.add_icon_white} alt="" />
                 :<div className="food-item-counter">
-                        <img src={assets.remove_icon_red} onClick={()=>removeFromCart(id)} alt="" />
-                        <p>{cartItems[id]}</p>
-                        <img src={assets.add_icon_green} onClick={()=>addToCart(id)} alt="" />
+                        <img src={assets.remove_icon_red} onClick={()=>removeFromCart(cartKey)} alt="" />
+                        <p>{cartQuantity}</p>
+                        <img src={assets.add_icon_green} onClick={()=>setShowSideDishesPopup(true)} alt="" />
                     </div>
                 }
             </div>
@@ -28,6 +52,15 @@ const FoodItem = ({ image, name, price, desc , id }) => {
                 <p className="food-item-desc">{desc}</p>
                 <p className="food-item-price">{currency}{price}</p>
             </div>
+
+            {showSideDishesPopup && createPortal(
+                <SideDishesPopup
+                    food={{ id, name, price, desc, image, sideDishes }}
+                    onClose={handleClosePopup}
+                    onAddToCart={handleAddToCart}
+                />,
+                document.body
+            )}
         </div>
     )
 }

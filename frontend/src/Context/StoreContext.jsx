@@ -18,25 +18,35 @@ const StoreContextProvider = (props) => {
     const deliveryCharge = 5;
     const [userEmail, setUserEmail] = useState("");
 
-    const addToCart = async (itemId) => {
-        if (!cartItems[itemId]) {
-            setCartItems((prev) => ({ ...prev, [itemId]: 1 }));
+    const addToCart = async (itemId, sideDishes = []) => {
+        // Create a more robust cart key using base64 encoding to avoid JSON parsing issues
+        let cartKey = itemId;
+        if (sideDishes.length > 0) {
+            const sideDishesString = JSON.stringify(sideDishes);
+            const encodedSideDishes = btoa(sideDishesString); // Base64 encode to avoid special characters
+            cartKey = `${itemId}_${encodedSideDishes}`;
+        }
+        
+        if (!cartItems[cartKey]) {
+            setCartItems((prev) => ({ ...prev, [cartKey]: 1 }));
         }
         else {
-            setCartItems((prev) => ({ ...prev, [itemId]: prev[itemId] + 1 }));
+            setCartItems((prev) => ({ ...prev, [cartKey]: prev[cartKey] + 1 }));
         }
         if (token && userIdState) {
             await axios.post(
                 url + "/api/cart/add",
-                { itemId, userId: userIdState },
+                { itemId, userId: userIdState, sideDishes },
                 { headers: { Authorization: `Bearer ${token}` } }
             );
         }
     }
 
-    const removeFromCart = async (itemId) => {
-        setCartItems((prev) => ({ ...prev, [itemId]: prev[itemId] - 1 }))
+    const removeFromCart = async (cartKey) => {
+        setCartItems((prev) => ({ ...prev, [cartKey]: prev[cartKey] - 1 }))
         if (token && userIdState) {
+            // Extract itemId from cartKey (remove side dishes part if present)
+            const itemId = cartKey.includes('_') ? cartKey.split('_')[0] : cartKey;
             await axios.post(
                 url + "/api/cart/remove",
                 { itemId, userId: userIdState },
@@ -47,17 +57,54 @@ const StoreContextProvider = (props) => {
 
     const getTotalCartAmount = () => {
         let totalAmount = 0;
-        for (const item in cartItems) {
+        console.log('Calculating cart total...');
+        console.log('Cart items:', cartItems);
+        console.log('Food list:', food_list);
+        
+        for (const cartKey in cartItems) {
             try {
-              if (cartItems[item] > 0) {
-                let itemInfo = food_list.find((product) => product._id === item);
-                totalAmount += itemInfo.price * cartItems[item];
+              if (cartItems[cartKey] > 0) {
+                // Extract itemId from cartKey (remove side dishes part if present)
+                const itemId = cartKey.includes('_') ? cartKey.split('_')[0] : cartKey;
+                let itemInfo = food_list.find((product) => product._id === itemId);
+                
+                console.log(`Processing cartKey: ${cartKey}, itemId: ${itemId}, quantity: ${cartItems[cartKey]}`);
+                console.log('Found item:', itemInfo);
+                
+                if (itemInfo) {
+                    let itemTotal = itemInfo.price;
+                    console.log(`Base price: ${itemTotal}`);
+                    
+                    // Add side dishes price if present
+                    if (cartKey.includes('_')) {
+                        try {
+                            // Find the first underscore and get everything after it
+                            const underscoreIndex = cartKey.indexOf('_');
+                            const encodedSideDishes = cartKey.substring(underscoreIndex + 1);
+                            const sideDishesJson = atob(encodedSideDishes); // Base64 decode
+                            const sideDishes = JSON.parse(sideDishesJson);
+                            console.log('Side dishes:', sideDishes);
+                            const sideDishesTotal = sideDishes.reduce((sum, sd) => sum + sd.price, 0);
+                            console.log('Side dishes total:', sideDishesTotal);
+                            itemTotal += sideDishesTotal;
+                        } catch (e) {
+                            console.error('Error parsing side dishes:', e);
+                            console.error('CartKey:', cartKey);
+                            console.error('Attempted to parse:', cartKey.split('_')[1]);
+                        }
+                    }
+                    
+                    const entryTotal = itemTotal * cartItems[cartKey];
+                    console.log(`Entry total: ${entryTotal}`);
+                    totalAmount += entryTotal;
+                }
             }  
             } catch (error) {
-                
+                console.error('Error calculating total:', error);
             }
             
         }
+        console.log('Final total amount:', totalAmount);
         return totalAmount;
     }
 
@@ -98,6 +145,10 @@ const StoreContextProvider = (props) => {
 
     useEffect(() => {
         fetchFoodList();
+        
+        // Set up auto-refresh every 10 seconds
+        const refreshInterval = setInterval(fetchFoodList, 10000);
+        
         const unsubscribe = onAuthStateChanged(auth, async (user) => {
             setFirebaseUser(user);
             if (user) {
@@ -130,7 +181,12 @@ const StoreContextProvider = (props) => {
                 setUserId("");
             }
         });
-        return () => unsubscribe();
+        
+        // Cleanup function to clear the interval and unsubscribe
+        return () => {
+            clearInterval(refreshInterval);
+            unsubscribe();
+        };
     }, []);
 
     const contextValue = {
