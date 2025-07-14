@@ -160,7 +160,9 @@ const Order = () => {
                 <p>Secondary level: {order.address.secondaryLevel}</p>
                 <p>Email: {order.address.email}</p>
               </div>
-              <p><b>Collection Date:</b> {order.collectedDate ? order.collectedDate.slice(0, 10) : 'N/A'}</p>
+              <p><b>Collection Date:</b> {order.collectedDate ? order.collectedDate.slice(0, 10) : 'N/A'}
+                {order.collectionTime && <span> at {order.collectionTime}</span>}
+              </p>
               {/* <p className='order-item-phone'>{order.address.phone}</p> */}
             </div>
             <p>{t('items')}: {order.items.length}</p>

@@ -15,6 +15,7 @@ const List = () => {
   const [selectedStore, setSelectedStore] = useState(() => {
     return localStorage.getItem('admin_selectedStore') || '';
   });
+  const [showSoldOut, setShowSoldOut] = useState(true);
 
   const fetchList = async () => {
     const response = await axios.get(`${url}/api/food/list`)
@@ -39,6 +40,19 @@ const List = () => {
     }
   }
 
+  const toggleAvailability = async (foodId) => {
+    const response = await axios.post(`${url}/api/food/toggle-availability`, {
+      id: foodId
+    })
+    await fetchList();
+    if (response.data.success) {
+      toast.success(response.data.message);
+    }
+    else {
+      toast.error("Error")
+    }
+  }
+
   useEffect(() => {
     fetchList();
     const interval = setInterval(fetchList, 10000); // Refresh every 10 seconds
@@ -52,18 +66,30 @@ const List = () => {
   return (
     <div className='list add flex-col'>
       <p>{t('listItems')}</p>
-      <div style={{ marginBottom: 20 }}>
-        <label htmlFor="store-select">{t('filterByStall') || 'Filter by Store:'} </label>
-        <select
-          id="store-select"
-          value={selectedStore}
-          onChange={e => setSelectedStore(e.target.value)}
-        >
-          <option value="">-- {t('allStores') || 'All Stores'} --</option>
-          {STORES.map(store => (
-            <option key={store} value={store}>{store}</option>
-          ))}
-        </select>
+      <div style={{ marginBottom: 20, display: 'flex', gap: '20px', alignItems: 'center' }}>
+        <div>
+          <label htmlFor="store-select">{t('filterByStall') || 'Filter by Store:'} </label>
+          <select
+            id="store-select"
+            value={selectedStore}
+            onChange={e => setSelectedStore(e.target.value)}
+          >
+            <option value="">-- {t('allStores') || 'All Stores'} --</option>
+            {STORES.map(store => (
+              <option key={store} value={store}>{store}</option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <label>
+            <input
+              type="checkbox"
+              checked={showSoldOut}
+              onChange={e => setShowSoldOut(e.target.checked)}
+            />
+            {t('showSoldOut') || 'Show Sold Out Items'}
+          </label>
+        </div>
       </div>
       <div className='list-table'>
         <div className="list-table-format title">
@@ -72,10 +98,12 @@ const List = () => {
           <b>{t('storeNumber') || 'Category'}</b>
           <b>{t('price') || 'Price'}</b>
           <b>{t('promoCode') || 'Promo Code'}</b>
+          <b>{t('availability') || 'Availability'}</b>
           <b>{t('action') || 'Action'}</b>
         </div>
         {list
           .filter(item => !selectedStore || item.category === selectedStore)
+          .filter(item => showSoldOut || item.isAvailable !== false)
           .map((item, index) => {
             return (
               <div key={index} className='list-table-format'>
@@ -98,6 +126,15 @@ const List = () => {
                       {t('noPromoCode') || 'No promo code'}
                     </span>
                   )}
+                </p>
+                <p>
+                  <span 
+                    className={`availability-status ${item.isAvailable ? 'available' : 'sold-out'}`}
+                    onClick={() => toggleAvailability(item._id)}
+                    style={{ cursor: 'pointer' }}
+                  >
+                    {item.isAvailable ? (t('available') || 'Available') : (t('soldOut') || 'Sold Out')}
+                  </span>
                 </p>
                 <p className='cursor' onClick={() => removeFood(item._id)}>{t('remove')}</p>
               </div>

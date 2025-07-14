@@ -8,6 +8,7 @@ const foodSchema = new mongoose.Schema({
     category:{ type:String, required:true},
     promoCode: { type: String },
     promoDiscount: { type: Number },
+    isAvailable: { type: Boolean, default: true }, // Track availability status
     sideDishes: [{ 
         name: { type: String, required: true },
         price: { type: Number, required: true },

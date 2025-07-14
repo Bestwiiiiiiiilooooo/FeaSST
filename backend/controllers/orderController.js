@@ -35,6 +35,7 @@ const placeOrder = async (req, res) => {
             orderNumber,
             stallId: req.body.stallId,
             collectedDate: orderDate,
+            collectionTime: req.body.collectionTime,
         })
         await newOrder.save();
         await userModel.findByIdAndUpdate(req.body.userId, { cartData: {} });
@@ -67,6 +68,7 @@ const placeOrderCod = async (req, res) => {
             orderNumber,
             stallId: req.body.stallId,
             collectedDate: orderDate,
+            collectionTime: req.body.collectionTime,
         })
         await newOrder.save();
         await userModel.findByIdAndUpdate(req.body.userId, { cartData: {} });

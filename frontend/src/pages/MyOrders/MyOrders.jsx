@@ -46,7 +46,10 @@ const MyOrders = () => {
             <div key={index} className='my-orders-order'>
                 <img src={assets.parcel_icon} alt="" />
                 <p className='order-number'>Order No: {order.orderNumber}</p>
-                <p className='collection-date'><b>Collection Date:</b> {order.collectedDate ? order.collectedDate.slice(0, 10) : 'N/A'}</p>
+                <p className='collection-date'>
+                    <b>Collection Date:</b> {order.collectedDate ? order.collectedDate.slice(0, 10) : 'N/A'}
+                    {order.collectionTime && <span> at {order.collectionTime}</span>}
+                </p>
                 <p>{order.items.map((item,index)=>{
                   let itemText = item.name;
                   

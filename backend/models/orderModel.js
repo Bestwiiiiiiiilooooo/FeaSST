@@ -12,6 +12,7 @@ const orderSchema = new mongoose.Schema({
     statusUpdatedAt: { type: Date, default: Date.now },
     stallId: { type: String, required: true },
     collectedDate: { type: Date },
+    collectionTime: { type: String }, // Store time in HH:MM format
 })
 
 // Valid statuses: 'Food Processing', 'Ready to Collect', 'Rejected'

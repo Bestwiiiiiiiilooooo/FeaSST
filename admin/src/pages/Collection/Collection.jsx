@@ -52,6 +52,9 @@ const Collection = () => {
                 <p>Class: {order.address.class}</p>
                 <p>Secondary level: {order.address.secondaryLevel}</p>
                 <p>Email: {order.address.email}</p>
+                <p><b>Collection:</b> {order.collectedDate ? order.collectedDate.slice(0, 10) : 'N/A'}
+                  {order.collectionTime && <span> at {order.collectionTime}</span>}
+                </p>
               </div>
             </div>
             <p>{t('items')}: {order.items.length}</p>

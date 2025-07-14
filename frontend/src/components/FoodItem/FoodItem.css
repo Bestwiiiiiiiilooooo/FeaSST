@@ -67,3 +67,37 @@
     font-weight: 500;
     margin: 10px 0px;
 }
+
+/* Sold out styling */
+.food-item.sold-out {
+    opacity: 0.7;
+    pointer-events: none;
+}
+
+.food-item.sold-out .food-item-img-container {
+    position: relative;
+}
+
+.sold-out-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 15px 15px 0px 0px;
+}
+
+.sold-out-overlay span {
+    color: white;
+    font-size: 18px;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    background-color: rgba(255, 0, 0, 0.8);
+    padding: 8px 16px;
+    border-radius: 20px;
+}

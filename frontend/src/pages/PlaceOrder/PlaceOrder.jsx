@@ -25,6 +25,8 @@ const PlaceOrder = () => {
         return tomorrow.toISOString().split('T')[0];
     });
 
+    const [collectionTime, setCollectionTime] = useState("12:00");
+
     const onChangeHandler = (event) => {
         const name = event.target.name
         const value = event.target.value
@@ -87,6 +89,7 @@ const PlaceOrder = () => {
                 amount: items.reduce((sum, item) => sum + (item.totalPrice || item.price) * item.quantity, 0),
                 stallId: store,
                 orderDate,
+                collectionTime,
             };
             try {
                 let response = await axios.post(url + "/api/order/place", orderData, { headers: { Authorization: `Bearer ${token}` } });
@@ -148,6 +151,18 @@ const PlaceOrder = () => {
                     onChange={e => setOrderDate(e.target.value)}
                     required
                   />
+                </div>
+                <div className='order-time-picker'>
+                  <p>Select Collection Time</p>
+                  <input
+                    type="time"
+                    value={collectionTime}
+                    min="07:00"
+                    max="18:00"
+                    onChange={e => setCollectionTime(e.target.value)}
+                    required
+                  />
+                  <small>Available times: 7:00 AM - 6:00 PM</small>
                 </div>
             </div>
             <div className="place-order-right">
