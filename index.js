@@ -7,10 +7,10 @@ import foodRouter from './routes/foodRoute.js';
 import cartRouter from './routes/cartRoute.js';
 import orderRouter from './routes/orderRoute.js';
 import menuRouter from './routes/menuRoute.js';
-import { onRequest } from 'firebase-functions/v2/https';
 
 // app config
 const app = express();
+const port = process.env.PORT || 4000;
 
 // middlewares
 app.use(express.json());
@@ -42,8 +42,7 @@ app.get('/', (req, res) => {
   res.send('API Working');
 });
 
-// Export the Express app as a Firebase Function
-export const api = onRequest({
-  region: 'us-central1',
-  maxInstances: 10
-}, app); 
+// Start the server
+app.listen(port, () => {
+  console.log(`Server started on http://localhost:${port}`);
+}); 
