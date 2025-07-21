@@ -27,6 +27,12 @@
 .footer-content-left h2, .footer-content-center h2, .footer-content-right h2{
     color: white;
 }
+.footer-content-left img{
+    max-width: 200px;
+    width: 100%;
+    height: auto;
+}
+
 .footer-social-icons img{
     width: 40px;
 }
@@ -48,7 +54,16 @@
         flex-direction: column;
         gap: 35px;
     }
+    .footer-content-left img{
+        max-width: 150px;
+    }
     .footer-copyright{
         text-align: center;
+    }
+}
+
+@media (max-width:480px) {
+    .footer-content-left img{
+        max-width: 120px;
     }
 }

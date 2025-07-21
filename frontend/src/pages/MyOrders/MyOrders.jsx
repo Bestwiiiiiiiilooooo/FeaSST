@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect, useState, useCallback } from 'react'
 import './MyOrders.css'
 import axios from 'axios'
 import { StoreContext } from '../../Context/StoreContext';
@@ -9,7 +9,21 @@ const MyOrders = () => {
   const [data,setData] =  useState([]);
   const {url,token,currency,userId} = useContext(StoreContext);
 
-  const fetchOrders = async () => {
+  // Function to get status color
+  const getStatusColor = (status) => {
+    switch (status) {
+      case 'Ready to Collect':
+        return '#28a745'; // Green
+      case 'Rejected':
+        return '#dc3545'; // Red
+      case 'Food Processing':
+        return '#ffc107'; // Yellow
+      default:
+        return '#6c757d'; // Gray for unknown status
+    }
+  };
+
+  const fetchOrders = useCallback(async () => {
     if (!userId) {
       console.error('No userId in context');
       return;
@@ -20,7 +34,7 @@ const MyOrders = () => {
       { headers: { Authorization: `Bearer ${token}` } }
     );
     setData(response.data.data)
-  }
+  }, [userId, url, token]);
 
   const deleteOrder = async (orderId) => {
     const response = await axios.post(url + "/api/order/delete", { orderId });
@@ -35,7 +49,7 @@ const MyOrders = () => {
       const interval = setInterval(fetchOrders, 10000); // Refresh every 10 seconds
       return () => clearInterval(interval);
     }
-  },[token])
+  },[token, fetchOrders])
 
   return (
     <div className='my-orders'>
@@ -67,10 +81,20 @@ const MyOrders = () => {
                     return itemText + ", ";
                   }
                 })}</p>
-                <p>{currency}{order.amount}.00</p>
+                <p>{currency}{Number(order.amount).toFixed(2)}</p>
                 <p>Items: {order.items.length}</p>
-                <p><span>&#x25cf;</span> <b>{order.status}</b></p>
-                <button onClick={fetchOrders}>Track Order</button>
+                <p>
+                  <span 
+                    style={{ 
+                      color: getStatusColor(order.status),
+                      fontSize: '1.2em',
+                      marginRight: '8px'
+                    }}
+                  >
+                    &#x25cf;
+                  </span> 
+                  <b>{order.status}</b>
+                </p>
                 <button className='my-orders-remove-btn' onClick={() => deleteOrder(order._id)}>Remove Order</button>
             </div>
           )

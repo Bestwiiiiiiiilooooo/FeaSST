@@ -1,11 +1,11 @@
-import React, { useContext, useState } from 'react'
 import './Cart.css'
+import { useContext, useState } from 'react'
 import { StoreContext } from '../../Context/StoreContext'
 import { useNavigate } from 'react-router-dom';
 
 const Cart = () => {
 
-  const {cartItems, food_list, removeFromCart,getTotalCartAmount,url,currency,deliveryCharge, clearCart} = useContext(StoreContext);
+  const {cartItems, food_list, removeFromCart,getTotalCartAmount,url,currency, clearCart} = useContext(StoreContext);
   const navigate = useNavigate();
 
   const [promoInput, setPromoInput] = useState("");
@@ -24,6 +24,17 @@ const Cart = () => {
              item.promoCode.trim().toLowerCase() === promoInput.trim().toLowerCase();
     });
     setPromoStatus(hasValidPromo ? "Valid" : "Not valid");
+    
+    // Store promo code information in localStorage if valid
+    if (hasValidPromo) {
+      const promoInfo = {
+        code: promoInput.trim(),
+        appliedAt: new Date().toISOString()
+      };
+      localStorage.setItem('appliedPromoCode', JSON.stringify(promoInfo));
+    } else {
+      localStorage.removeItem('appliedPromoCode');
+    }
   };
 
   // Calculate promo discount if valid
@@ -53,7 +64,11 @@ const Cart = () => {
           // Add side dishes price if present
           if (cartKey.includes('_')) {
             try {
-              const sideDishes = JSON.parse(cartKey.split('_')[1]);
+              // Find the first underscore and get everything after it
+              const underscoreIndex = cartKey.indexOf('_');
+              const encodedSideDishes = cartKey.substring(underscoreIndex + 1);
+              const sideDishesJson = atob(encodedSideDishes); // Base64 decode
+              const sideDishes = JSON.parse(sideDishesJson);
               const sideDishesTotal = sideDishes.reduce((sum, sd) => sum + sd.price, 0);
               entryTotal += sideDishesTotal;
             } catch (e) {
@@ -117,15 +132,15 @@ const Cart = () => {
                       <div className="side-dishes-list">
                         {sideDishes.map((sd, sdIndex) => (
                           <span key={sdIndex} className="side-dish-tag">
-                            {sd.name} (+{currency}{sd.price})
+                            {sd.name} (+{currency}{Number(sd.price).toFixed(2)})
                           </span>
                         ))}
                       </div>
                     )}
                   </div>
-                  <p>{currency}{item.price}</p>
+                  <p>{currency}{Number(item.price).toFixed(2)}</p>
                   <div>{quantity}</div>
-                  <p>{currency}{itemTotal * quantity}</p>
+                  <p>{currency}{Number(itemTotal * quantity).toFixed(2)}</p>
                   <p className='cart-items-remove-icon' onClick={()=>removeFromCart(cartKey)}>x</p>
                 </div>
                 <hr />
@@ -138,7 +153,7 @@ const Cart = () => {
         <div className="cart-total">
           <h2>Cart Totals</h2>
           <div>
-            <div className="cart-total-details"><p>Subtotal</p><p>{currency}{subtotal}</p></div>
+            <div className="cart-total-details"><p>Subtotal</p><p>{currency}{Number(subtotal).toFixed(2)}</p></div>
             <hr />
             {promoStatus === 'Valid' && promoDiscountAmount > 0 && (
               <div className="cart-total-details" style={{color: 'green'}}>
@@ -146,7 +161,7 @@ const Cart = () => {
                 <p>-{currency}{promoDiscountAmount.toFixed(2)}</p>
               </div>
             )}
-            <div className="cart-total-details"><b>Total</b><b>{currency}{total}</b></div>
+            <div className="cart-total-details"><b>Total</b><b>{currency}{Number(total).toFixed(2)}</b></div>
           </div>
           <button onClick={()=>navigate('/order')}>PROCEED TO CHECKOUT</button>
           <button className='cart-clear-btn' onClick={clearCart}>CLEAR CART</button>

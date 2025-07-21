@@ -1,7 +1,6 @@
-import React, { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import './PlaceOrder.css'
 import { StoreContext } from '../../Context/StoreContext'
-import { assets } from '../../assets/assets';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import axios from 'axios';
@@ -15,7 +14,7 @@ const PlaceOrder = () => {
         email: ""
     })
 
-    const { getTotalCartAmount, token, food_list, cartItems, url, setCartItems,currency,deliveryCharge,userId,firebaseUser,userEmail } = useContext(StoreContext);
+    const { getTotalCartAmount, token, food_list, cartItems, url, setCartItems,currency,userId,firebaseUser,userEmail } = useContext(StoreContext);
 
     const navigate = useNavigate();
 
@@ -26,6 +25,66 @@ const PlaceOrder = () => {
     });
 
     const [collectionTime, setCollectionTime] = useState("12:00");
+
+    // Get applied promo code from localStorage
+    const [appliedPromoCode] = useState(() => {
+        const stored = localStorage.getItem('appliedPromoCode');
+        return stored ? JSON.parse(stored) : null;
+    });
+
+    // Calculate promo discount if valid
+    const calculatePromoDiscount = () => {
+        if (!appliedPromoCode) return 0;
+        
+        // Find all items in cart with matching promo code
+        const matchingItems = food_list.filter(item => {
+            // Check if this item exists in cart (with or without side dishes)
+            const itemInCart = Object.entries(cartItems).some(([cartKey, quantity]) => {
+                const itemId = cartKey.includes('_') ? cartKey.split('_')[0] : cartKey;
+                return itemId === item._id && quantity > 0;
+            });
+            
+            return itemInCart && item.promoCode && 
+                   item.promoCode.trim().toLowerCase() === appliedPromoCode.code.toLowerCase();
+        });
+        
+        // Apply the highest discount among matching items
+        const promoDiscountAmount = Math.max(...matchingItems.map(item => {
+            // Calculate total for this item including all cart entries (with side dishes)
+            let itemTotal = 0;
+            Object.entries(cartItems).forEach(([cartKey, quantity]) => {
+                const itemId = cartKey.includes('_') ? cartKey.split('_')[0] : cartKey;
+                if (itemId === item._id && quantity > 0) {
+                    let entryTotal = item.price;
+                    
+                    // Add side dishes price if present
+                    if (cartKey.includes('_')) {
+                        try {
+                            // Find the first underscore and get everything after it
+                            const underscoreIndex = cartKey.indexOf('_');
+                            const encodedSideDishes = cartKey.substring(underscoreIndex + 1);
+                            const sideDishesJson = atob(encodedSideDishes); // Base64 decode
+                            const sideDishes = JSON.parse(sideDishesJson);
+                            const sideDishesTotal = sideDishes.reduce((sum, sd) => sum + sd.price, 0);
+                            entryTotal += sideDishesTotal;
+                        } catch (e) {
+                            console.error('Error parsing side dishes:', e);
+                        }
+                    }
+                    
+                    itemTotal += entryTotal * quantity;
+                }
+            });
+            
+            return item.promoDiscount ? (itemTotal * (item.promoDiscount / 100)) : 0;
+        }), 0);
+
+        return promoDiscountAmount;
+    };
+
+    const promoDiscountAmount = calculatePromoDiscount();
+    const subtotal = getTotalCartAmount();
+    const total = Math.max(0, subtotal - promoDiscountAmount);
 
     const onChangeHandler = (event) => {
         const name = event.target.name
@@ -82,11 +141,16 @@ const PlaceOrder = () => {
         });
         // Place an order for each store
         const results = await Promise.all(Object.entries(itemsByStore).map(async ([store, items]) => {
+            // Calculate store-specific discount
+            const storeItemsTotal = items.reduce((sum, item) => sum + (item.totalPrice || item.price) * item.quantity, 0);
+            const storeDiscount = storeItemsTotal > 0 ? (promoDiscountAmount * (storeItemsTotal / subtotal)) : 0;
+            const storeFinalAmount = Math.max(0, storeItemsTotal - storeDiscount);
+            
             const orderData = {
                 userId,
                 address: data,
                 items,
-                amount: items.reduce((sum, item) => sum + (item.totalPrice || item.price) * item.quantity, 0),
+                amount: storeFinalAmount,
                 stallId: store,
                 orderDate,
                 collectionTime,
@@ -103,6 +167,8 @@ const PlaceOrder = () => {
         if (allSuccess) {
             toast.success(`Orders placed for: ${results.map(r => r.store).join(', ')}`);
             setCartItems({});
+            // Clear applied promo code after successful order
+            localStorage.removeItem('appliedPromoCode');
             navigate("/myorders");
         } else {
             results.forEach(r => {
@@ -119,7 +185,7 @@ const PlaceOrder = () => {
         else if (getTotalCartAmount() === 0) {
             navigate('/cart')
         }
-    }, [token])
+    }, [token, getTotalCartAmount, navigate])
 
     useEffect(() => {
         const emailToUse = userEmail || (firebaseUser && firebaseUser.email) || "";
@@ -141,7 +207,7 @@ const PlaceOrder = () => {
                   <option value="3">3</option>
                   <option value="4">4</option>
                 </select>
-                <input type="email" name='email' onChange={onChangeHandler} value={data.email} placeholder='Email' required />
+                <input type="email" name='email' value={data.email} placeholder='Email' readOnly />
                 <div className='order-date-picker'>
                   <p>Select Order Date</p>
                   <input
@@ -203,14 +269,14 @@ const PlaceOrder = () => {
                                                         <div className="order-item-side-dishes-label">Side Dishes:</div>
                                                         {sideDishes.map((sideDish, index) => (
                                                             <span key={index} className="order-item-side-dish">
-                                                                {sideDish.name} (+{currency}{sideDish.price})
+                                                                {sideDish.name} (+{currency}{Number(sideDish.price).toFixed(2)})
                                                             </span>
                                                         ))}
                                                     </div>
                                                 )}
                                             </div>
                                             <div className="order-item-price">
-                                                {currency}{totalPrice}
+                                                {currency}{Number(totalPrice).toFixed(2)}
                                                 <span className="order-item-quantity">× {quantity}</span>
                                             </div>
                                         </div>
@@ -222,9 +288,17 @@ const PlaceOrder = () => {
                     </div>
                     
                     <div>
-                        <div className="cart-total-details"><p>Subtotal</p><p>{currency}{getTotalCartAmount()}</p></div>
-                        <hr />
-                        <div className="cart-total-details"><b>Total</b><b>{currency}{getTotalCartAmount() === 0 ? 0 : getTotalCartAmount()}</b></div>
+                        <div className="cart-total-details"><p>Subtotal</p><p>{currency}{Number(subtotal).toFixed(2)}</p></div>
+                        {appliedPromoCode && promoDiscountAmount > 0 && (
+                            <>
+                                <div className="cart-total-details" style={{color: 'green'}}>
+                                    <p>Promo Discount ({appliedPromoCode.code})</p>
+                                    <p>-{currency}{promoDiscountAmount.toFixed(2)}</p>
+                                </div>
+                                <hr />
+                            </>
+                        )}
+                        <div className="cart-total-details"><b>Total</b><b>{currency}{Number(total).toFixed(2)}</b></div>
                     </div>
                 </div>
                 <div className="payment">

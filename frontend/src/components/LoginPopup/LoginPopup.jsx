@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react'
+import { useContext, useState } from 'react'
 import './LoginPopup.css'
 import { assets } from '../../assets/assets'
 import { StoreContext } from '../../Context/StoreContext'
@@ -6,6 +6,7 @@ import axios from 'axios'
 import { toast } from 'react-toastify'
 import { auth, googleProvider } from '../../firebase'
 import { signInWithPopup, sendPasswordResetEmail } from "firebase/auth"
+import PropTypes from 'prop-types'
 
 const LoginPopup = ({ setShowLogin }) => {
 
@@ -50,7 +51,7 @@ const LoginPopup = ({ setShowLogin }) => {
                 if (userRes.data.success) {
                     setUserId(userRes.data.userId);
                 }
-            } catch (err) {}
+            } catch (err) { /* handle error if needed */ }
             setShowLogin(false)
         }
         else {
@@ -128,5 +129,9 @@ const LoginPopup = ({ setShowLogin }) => {
         </div>
     )
 }
+
+LoginPopup.propTypes = {
+  setShowLogin: PropTypes.func.isRequired,
+};
 
 export default LoginPopup

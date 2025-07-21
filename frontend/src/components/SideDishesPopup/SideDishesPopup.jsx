@@ -1,11 +1,12 @@
-import React, { useState, useContext, useCallback, useEffect } from 'react';
+import { useState, useContext, useCallback, useEffect } from 'react';
 import './SideDishesPopup.css';
 import { StoreContext } from '../../Context/StoreContext';
 import { assets } from '../../assets/assets';
+import PropTypes from 'prop-types'
 
 const SideDishesPopup = ({ food, onClose, onAddToCart }) => {
     const [selectedSideDishes, setSelectedSideDishes] = useState([]);
-    const { currency } = useContext(StoreContext);
+    const { currency, url } = useContext(StoreContext);
 
     const toggleSideDish = useCallback((sideDish) => {
         setSelectedSideDishes(prev => {
@@ -55,10 +56,10 @@ const SideDishesPopup = ({ food, onClose, onAddToCart }) => {
                 </div>
                 
                 <div className="food-details">
-                    <img src={`http://localhost:4000/images/${food.image}`} alt={food.name} />
+                    <img src={`${url}/images/${food.image}`} alt={food.name} />
                     <div className="food-info">
                         <p className="description">{food.description}</p>
-                        <p className="base-price">Base Price: {currency}{food.price}</p>
+                        <p className="base-price">Base Price: {currency}{Number(food.price).toFixed(2)}</p>
                     </div>
                 </div>
 
@@ -75,7 +76,7 @@ const SideDishesPopup = ({ food, onClose, onAddToCart }) => {
                                     <div className="side-dish-info">
                                         <h4>{sideDish.name}</h4>
                                         {sideDish.description && <p>{sideDish.description}</p>}
-                                        <span className="side-dish-price">{currency}{sideDish.price}</span>
+                                        <span className="side-dish-price">{currency}{Number(sideDish.price).toFixed(2)}</span>
                                     </div>
                                     <div className="checkbox">
                                         <img 
@@ -95,7 +96,7 @@ const SideDishesPopup = ({ food, onClose, onAddToCart }) => {
 
                 <div className="popup-footer">
                     <div className="total-price">
-                        <span>Total: {currency}{getTotalPrice()}</span>
+                        <span>Total: {currency}{Number(getTotalPrice()).toFixed(2)}</span>
                     </div>
                     <button className="add-to-cart-btn" onClick={handleAddToCart}>
                         Add to Cart
@@ -104,6 +105,20 @@ const SideDishesPopup = ({ food, onClose, onAddToCart }) => {
             </div>
         </div>
     );
+};
+
+SideDishesPopup.propTypes = {
+  food: PropTypes.shape({
+    id: PropTypes.string.isRequired,
+    name: PropTypes.string.isRequired,
+    price: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+    desc: PropTypes.string,
+    image: PropTypes.string,
+    sideDishes: PropTypes.array,
+    description: PropTypes.string,
+  }).isRequired,
+  onClose: PropTypes.func.isRequired,
+  onAddToCart: PropTypes.func.isRequired,
 };
 
 export default SideDishesPopup; 

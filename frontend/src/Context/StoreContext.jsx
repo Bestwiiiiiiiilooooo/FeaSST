@@ -1,14 +1,32 @@
-import { createContext, useEffect, useState } from "react";
-import { food_list, menu_list } from "../assets/assets";
+import { createContext, useEffect, useState, useCallback } from "react";
 import axios from "axios";
 import { auth } from "../firebase";
-import { onAuthStateChanged } from "firebase/auth";
+import { onAuthStateChanged, signOut } from "firebase/auth";
+import PropTypes from 'prop-types'
 
 export const StoreContext = createContext(null);
 
 const StoreContextProvider = (props) => {
 
-    const url = "http://localhost:4000"
+    // Environment-based URL configuration
+    const getApiUrl = () => {
+        // Check if we're in production (hosted on Firebase)
+        const isProduction = window.location.hostname !== 'localhost' && 
+                           window.location.hostname !== '127.0.0.1';
+        
+        if (isProduction) {
+            // Production URL - update this to your actual backend URL
+            const productionUrl = 'https://feasst-9pe1.onrender.com'; // Replace with your actual backend URL
+            console.log('Using production API URL:', productionUrl);
+            return productionUrl;
+        }
+        
+        // Development URL
+        console.log('Using development API URL: http://localhost:4000');
+        return "http://localhost:4000";
+    };
+
+    const url = getApiUrl();
     const [food_list, setFoodList] = useState([]);
     const [cartItems, setCartItems] = useState({});
     const [token, setToken] = useState("")
@@ -17,6 +35,7 @@ const StoreContextProvider = (props) => {
     const currency = "$";
     const deliveryCharge = 5;
     const [userEmail, setUserEmail] = useState("");
+    const [hasInitialized, setHasInitialized] = useState(false);
 
     const addToCart = async (itemId, sideDishes = []) => {
         // Create a more robust cart key using base64 encoding to avoid JSON parsing issues
@@ -99,21 +118,27 @@ const StoreContextProvider = (props) => {
                     totalAmount += entryTotal;
                 }
             }  
-            } catch (error) {
-                console.error('Error calculating total:', error);
+                            } catch (error) {
+                    console.error('Error calculating total:', error);
+                }
             }
-            
-        }
         console.log('Final total amount:', totalAmount);
         return totalAmount;
     }
 
-    const fetchFoodList = async () => {
-        const response = await axios.get(url + "/api/food/list");
-        setFoodList(response.data.data)
-    }
+    const fetchFoodList = useCallback(async () => {
+        try {
+            console.log('Fetching food list from:', url + "/api/food/list");
+            const response = await axios.get(url + "/api/food/list");
+            console.log('Food list response:', response.data);
+            setFoodList(response.data.data || []);
+        } catch (error) {
+            console.error('Error fetching food list:', error);
+            setFoodList([]);
+        }
+    }, [url]);
 
-    const loadCartData = async ({ token, userId }) => {
+    const loadCartData = useCallback(async ({ token, userId }) => {
         if (!userId) return setCartItems({});
         const response = await axios.post(
             url + "/api/cart/get",
@@ -121,7 +146,7 @@ const StoreContextProvider = (props) => {
             { headers: { Authorization: `Bearer ${token}` } }
         );
         setCartItems(response.data.cartData || {});
-    }
+    }, [url]);
 
     const clearCart = async () => {
         setCartItems({});
@@ -149,9 +174,31 @@ const StoreContextProvider = (props) => {
         // Set up auto-refresh every 10 seconds
         const refreshInterval = setInterval(fetchFoodList, 10000);
         
+        // Only clear authentication data on initial app load
+        if (!hasInitialized) {
+            localStorage.removeItem('token');
+            localStorage.removeItem('userId');
+            setHasInitialized(true);
+        }
+        
         const unsubscribe = onAuthStateChanged(auth, async (user) => {
             setFirebaseUser(user);
-            if (user) {
+            if (user && !hasInitialized) {
+                // Only sign out automatically on initial load
+                try {
+                    await signOut(auth);
+                    setToken("");
+                    setCartItems({});
+                    setUserId("");
+                } catch (error) {
+                    console.error('Error signing out:', error);
+                    // Even if sign out fails, clear the state
+                    setToken("");
+                    setCartItems({});
+                    setUserId("");
+                }
+            } else if (user && hasInitialized) {
+                // Normal authentication flow after initial load
                 const idToken = await user.getIdToken();
                 setToken(idToken);
                 // Fetch userId from backend for Firebase user
@@ -176,6 +223,7 @@ const StoreContextProvider = (props) => {
                     setCartItems({});
                 }
             } else {
+                // No user, ensure clean state
                 setToken("");
                 setCartItems({});
                 setUserId("");
@@ -187,12 +235,11 @@ const StoreContextProvider = (props) => {
             clearInterval(refreshInterval);
             unsubscribe();
         };
-    }, []);
+    }, [fetchFoodList, loadCartData, url, hasInitialized]);
 
     const contextValue = {
         url,
         food_list,
-        menu_list,
         cartItems,
         addToCart,
         removeFromCart,
@@ -219,5 +266,9 @@ const StoreContextProvider = (props) => {
     )
 
 }
+
+StoreContextProvider.propTypes = {
+  children: PropTypes.node.isRequired,
+};
 
 export default StoreContextProvider;

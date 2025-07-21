@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import './ExploreMenu.css'
 import { assets } from '../../assets/assets'
+import PropTypes from 'prop-types'
 
 const imageMap = {
   'menu_1.png': assets.menu_1,
@@ -16,21 +17,34 @@ const imageMap = {
 const ExploreMenu = ({category,setCategory}) => {
   const [menuList, setMenuList] = useState([]);
 
-  const fetchMenu = async () => {
+  // Environment-based URL configuration
+  const getApiUrl = () => {
+    if (import.meta.env.VITE_API_URL) {
+      return import.meta.env.VITE_API_URL;
+    }
+    // Default to localhost for development
+    return "http://localhost:4000";
+  };
+
+  const url = getApiUrl();
+
+  const fetchMenu = useCallback(async () => {
     try {
-      const response = await fetch('http://localhost:4000/api/menu/list');
+      console.log('ExploreMenu - Fetching menu from:', url + "/api/menu/list");
+      const response = await fetch(url + "/api/menu/list");
       const data = await response.json();
+      console.log('ExploreMenu - Menu response:', data);
       setMenuList(data.data || []);
     } catch (error) {
-      // Optionally handle error
+      console.error('ExploreMenu - Error fetching menu:', error);
     }
-  };
+  }, [url]);
 
   useEffect(() => {
     fetchMenu();
     const interval = setInterval(fetchMenu, 5000);
     return () => clearInterval(interval);
-  }, []);
+  }, [fetchMenu]);
 
   return (
     <div className='explore-menu' id='explore-menu'>
@@ -53,5 +67,10 @@ const ExploreMenu = ({category,setCategory}) => {
     </div>
   )
 }
+
+ExploreMenu.propTypes = {
+  category: PropTypes.string.isRequired,
+  setCategory: PropTypes.func.isRequired,
+};
 
 export default ExploreMenu

@@ -9,7 +9,8 @@
     "dev:5174": "PORT=5174 vite",
     "dev:5175": "PORT=5175 vite",
     "dev:multi": "concurrently \"npm run dev:5173\" \"npm run dev:5174\"",
-    "build": "vite build",
+    "build": "vite build --mode production",
+    "build:dev": "vite build",
     "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview"
   },
