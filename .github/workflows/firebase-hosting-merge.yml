@@ -11,12 +11,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Install dependencies
+      - name: Install dependencies (frontend)
         run: npm install
         working-directory: frontend
       - name: Build frontend
         run: npm run build
         working-directory: frontend
+      - name: Install dependencies (admin)
+        run: npm install
+        working-directory: admin
+      - name: Build admin
+        run: npm run build
+        working-directory: admin
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: ${{ secrets.GITHUB_TOKEN }}
