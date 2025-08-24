@@ -1,15 +1,17 @@
 import React, { useState, useRef, useEffect } from 'react'
 import './Navbar.css'
 import { assets } from '../../assets/assets'
+import { useLanguage } from '../../LanguageContext'
 
 const LANGUAGES = [
   { code: 'en', label: 'English' },
   { code: 'zh', label: '中文' },
+  { code: 'ms', label: 'Melayu' },
 ];
 
 const Navbar = () => {
   const [showLang, setShowLang] = useState(false);
-  const [language, setLanguage] = useState(() => localStorage.getItem('admin_language') || 'en');
+  const { language, changeLanguage } = useLanguage();
   const langRef = useRef();
 
   useEffect(() => {
@@ -23,8 +25,7 @@ const Navbar = () => {
   }, []);
 
   const handleLanguageChange = (code) => {
-    setLanguage(code);
-    localStorage.setItem('admin_language', code);
+    changeLanguage(code);
     setShowLang(false);
   };
 

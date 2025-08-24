@@ -28,7 +28,7 @@ const Add = () => {
         event.preventDefault();
 
         if (!image) {
-            toast.error('Image not selected');
+            toast.error(t('imageNotSelected'));
             return null;
         }
 
@@ -43,7 +43,7 @@ const Add = () => {
         formData.append("sideDishes", JSON.stringify(sideDishes));
         const response = await axios.post(`${url}/api/food/add`, formData);
         if (response.data.success) {
-            toast.success(response.data.message)
+            toast.success(t('itemAddedSuccess'))
             setData({
                 name: "",
                 description: "",
@@ -56,7 +56,7 @@ const Add = () => {
             setSideDishes([]);
         }
         else {
-            toast.error(response.data.message)
+            toast.error(response.data.message || t('errorOccurred'))
         }
     }
 
@@ -113,7 +113,7 @@ const Add = () => {
                 </div>
                 
                 <div className='add-side-dishes flex-col'>
-                    <p>Side Dishes (optional)</p>
+                    <p>{t('sideDishes')}</p>
                     <div className='side-dishes-container'>
                         {sideDishes.map((dish, index) => (
                             <div key={index} className='side-dish-item'>
@@ -123,26 +123,26 @@ const Add = () => {
                                     onClick={() => setSideDishes(sideDishes.filter((_, i) => i !== index))}
                                     className='remove-side-dish'
                                 >
-                                    ×
+                                    {t('removeSideDish')}
                                 </button>
                             </div>
                         ))}
                         <div className='add-side-dish-form'>
                             <input 
                                 type="text" 
-                                placeholder="Side dish name" 
+                                placeholder={t('sideDishName')}
                                 value={newSideDish.name}
                                 onChange={(e) => setNewSideDish({...newSideDish, name: e.target.value})}
                             />
                             <input 
                                 type="number" 
-                                placeholder="Price" 
+                                placeholder={t('sideDishPrice')}
                                 value={newSideDish.price}
                                 onChange={(e) => setNewSideDish({...newSideDish, price: e.target.value})}
                             />
                             <input 
                                 type="text" 
-                                placeholder="Description (optional)" 
+                                placeholder={t('sideDishDescription')}
                                 value={newSideDish.description}
                                 onChange={(e) => setNewSideDish({...newSideDish, description: e.target.value})}
                             />
@@ -159,7 +159,7 @@ const Add = () => {
                                 }}
                                 className='add-side-dish-btn'
                             >
-                                Add Side Dish
+                                {t('addSideDish')}
                             </button>
                         </div>
                     </div>

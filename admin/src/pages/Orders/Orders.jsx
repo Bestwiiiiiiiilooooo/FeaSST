@@ -95,20 +95,20 @@ const Order = () => {
   const deleteOrder = async (orderId) => {
     const response = await axios.post(`${url}/api/order/delete`, { orderId });
     if (response.data.success) {
-      toast.success("Order cleared");
+      toast.success(t('orderCleared'));
       await fetchAllOrders();
     } else {
-      toast.error("Failed to clear order");
+      toast.error(t('failedToClearOrder'));
     }
   }
 
   const clearAllOrders = async () => {
     const response = await axios.post(`${url}/api/order/clearall`);
     if (response.data.success) {
-      toast.success("All orders cleared");
+      toast.success(t('allOrdersCleared'));
       await fetchAllOrders();
     } else {
-      toast.error("Failed to clear all orders");
+      toast.error(t('failedToClearAllOrders'));
     }
   }
 
@@ -122,7 +122,7 @@ const Order = () => {
           value={selectedStall}
           onChange={e => setSelectedStall(e.target.value)}
         >
-          <option value="">-- All Stalls --</option>
+          <option value="">-- {t('allStalls')} --</option>
           {STALLS.map(stall => (
             <option key={stall.id} value={stall.id}>{stall.name}</option>
           ))}
@@ -142,7 +142,7 @@ const Order = () => {
                   // Add side dishes information if present
                   if (item.sideDishes && item.sideDishes.length > 0) {
                     const sideDishNames = item.sideDishes.map(sd => sd.name).join(', ');
-                    itemText += ` (with ${sideDishNames})`;
+                    itemText += ` (${t('with')} ${sideDishNames})`;
                   }
                   
                   itemText += ` x ${item.quantity}`;
@@ -156,11 +156,11 @@ const Order = () => {
               </p>
               <p className='order-item-name'>{order.address.name}</p>
               <div className='order-item-address'>
-                <p>Class: {order.address.class}</p>
-                <p>Secondary level: {order.address.secondaryLevel}</p>
-                <p>Email: {order.address.email}</p>
+                <p>{t('class')}: {order.address.class}</p>
+                <p>{t('secondaryLevel')}: {order.address.secondaryLevel}</p>
+                <p>{t('email')}: {order.address.email}</p>
               </div>
-              <p><b>Collection Date:</b> {order.collectedDate ? order.collectedDate.slice(0, 10) : 'N/A'}
+              <p><b>{t('collectionDate')}:</b> {order.collectedDate ? order.collectedDate.slice(0, 10) : 'N/A'}
                 {order.collectionTime && <span> at {order.collectionTime}</span>}
               </p>
               {/* <p className='order-item-phone'>{order.address.phone}</p> */}
@@ -169,13 +169,13 @@ const Order = () => {
             <p>{currency}{order.amount}</p>
             <div className="order-status-container">
               <CustomDropdown
-                options={["Food Processing", "Ready to Collect", "Rejected"]}
+                options={[t('foodProcessing'), t('readyToCollect'), t('rejected')]}
                 value={order.status}
                 onChange={(newStatus) => statusHandler({ target: { value: newStatus } }, order._id)}
               />
-              {(order.status === 'Ready to Collect' || order.status === 'Rejected') && getCountdown(order) > 0 && (
+              {(order.status === t('readyToCollect') || order.status === t('rejected')) && getCountdown(order) > 0 && (
                 <p className="disappearing-msg" style={{ color: 'tomato', fontWeight: 'bold', marginLeft: 8 }}>
-                  Disappearing in {getCountdown(order)}s
+                  {t('disappearingIn')} {getCountdown(order)}{t('seconds')}
                 </p>
               )}
             </div>

@@ -23,7 +23,7 @@ const List = () => {
       setList(response.data.data);
     }
     else {
-      toast.error("Error")
+      toast.error(t('errorOccurred'))
     }
   }
 
@@ -33,10 +33,10 @@ const List = () => {
     })
     await fetchList();
     if (response.data.success) {
-      toast.success(response.data.message);
+      toast.success(t('itemRemovedSuccess'));
     }
     else {
-      toast.error("Error")
+      toast.error(t('errorOccurred'))
     }
   }
 
@@ -46,10 +46,17 @@ const List = () => {
     })
     await fetchList();
     if (response.data.success) {
-      toast.success(response.data.message);
+      // Translate the backend message
+      let message = response.data.message;
+      if (message.includes('Food marked as Available')) {
+        message = t('foodMarkedAsAvailable');
+      } else if (message.includes('Food marked as Sold Out')) {
+        message = t('foodMarkedAsSoldOut');
+      }
+      toast.success(message);
     }
     else {
-      toast.error("Error")
+      toast.error(t('errorOccurred'))
     }
   }
 

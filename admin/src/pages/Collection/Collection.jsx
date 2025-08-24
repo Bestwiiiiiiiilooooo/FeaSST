@@ -49,10 +49,10 @@ const Collection = () => {
               </p>
               <p className='order-item-name'>{order.address.name}</p>
               <div className='order-item-address'>
-                <p>Class: {order.address.class}</p>
-                <p>Secondary level: {order.address.secondaryLevel}</p>
-                <p>Email: {order.address.email}</p>
-                <p><b>Collection:</b> {order.collectedDate ? order.collectedDate.slice(0, 10) : 'N/A'}
+                <p>{t('class')}: {order.address.class}</p>
+                <p>{t('secondaryLevel')}: {order.address.secondaryLevel}</p>
+                <p>{t('email')}: {order.address.email}</p>
+                <p><b>{t('collection')}:</b> {order.collectedDate ? order.collectedDate.slice(0, 10) : 'N/A'}
                   {order.collectionTime && <span> at {order.collectionTime}</span>}
                 </p>
               </div>

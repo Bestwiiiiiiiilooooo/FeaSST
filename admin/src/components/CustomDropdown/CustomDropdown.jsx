@@ -1,21 +1,37 @@
 import React, { useState, useRef, useEffect } from 'react';
 import './CustomDropdown.css';
+import { useLanguage } from '../../LanguageContext';
 
 const CustomDropdown = ({ options, value, onChange, disabled }) => {
+  const { t } = useLanguage();
   const [open, setOpen] = useState(false);
   const dropdownRef = useRef(null);
 
   // Function to get status color
   const getStatusColor = (status) => {
     switch (status) {
-      case 'Ready to Collect':
+      case t('readyToCollect'):
         return '#28a745'; // Green
-      case 'Rejected':
+      case t('rejected'):
         return '#dc3545'; // Red
-      case 'Food Processing':
+      case t('foodProcessing'):
         return '#ffc107'; // Yellow
       default:
         return '#6c757d'; // Gray for unknown status
+    }
+  };
+
+  // Function to translate status text
+  const translateStatus = (status) => {
+    switch (status) {
+      case 'Ready to Collect':
+        return t('readyToCollect');
+      case 'Rejected':
+        return t('rejected');
+      case 'Food Processing':
+        return t('foodProcessing');
+      default:
+        return status;
     }
   };
 
@@ -55,7 +71,7 @@ const CustomDropdown = ({ options, value, onChange, disabled }) => {
             &#x25cf;
           </span>
         )}
-        {value || 'Select...'}
+        {value ? translateStatus(value) : t('select')}
         <span className="custom-dropdown-arrow">▼</span>
       </button>
       {open && (
@@ -75,7 +91,7 @@ const CustomDropdown = ({ options, value, onChange, disabled }) => {
               >
                 &#x25cf;
               </span>
-              {option}
+              {translateStatus(option)}
             </div>
           ))}
         </div>
