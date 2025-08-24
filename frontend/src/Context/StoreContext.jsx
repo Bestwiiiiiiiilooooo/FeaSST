@@ -16,7 +16,7 @@ const StoreContextProvider = (props) => {
         
         if (isProduction) {
             // Production URL - update this to your actual backend URL
-            const productionUrl = 'https://feasst-9pe1.onrender.com'; // Replace with your actual backend URL
+            const productionUrl = 'https://food-del-backend.onrender.com'; // ✅ CORRECT BACKEND URL
             console.log('Using production API URL:', productionUrl);
             return productionUrl;
         }
