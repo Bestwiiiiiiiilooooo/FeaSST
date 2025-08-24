@@ -41,15 +41,17 @@ app.use(cors({
   credentials: true
 }));
 
-// Apply rate limiting
+// Apply rate limiting ONLY to specific endpoints that need protection
 app.use('/api/user/login', authLimiter);
 app.use('/api/user/register', authLimiter);
-app.use('/api', generalLimiter);
+app.use('/api/user', generalLimiter); // Only protect user routes
+app.use('/api/cart', generalLimiter); // Only protect cart routes
+app.use('/api/order', generalLimiter); // Only protect order routes
 
 // db connection
 connectDB();
 
-// api endpoints
+// api endpoints (no rate limiting on menu and food routes)
 app.use('/api/user', userRouter);
 app.use('/api/food', foodRouter);
 app.use('/images', express.static('uploads'));
