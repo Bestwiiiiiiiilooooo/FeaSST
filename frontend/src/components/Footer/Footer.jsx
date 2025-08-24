@@ -33,7 +33,7 @@ const Footer = () => {
         </div>
       </div>
       <hr />
-                  <p className="footer-copyright">Copyright 2024 © FeaSST.com - All Right Reserved. FeaSST - Fast Food Delivery Service.</p>
+                  <p className="footer-copyright">Copyright 2025 © FeaSST-food.web.app - All Right Reserved. FeaSST - SST's Food Preordering Service.</p>
     </div>
   )
 }
