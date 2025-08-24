@@ -6,8 +6,8 @@ const config = {
     apiUrl: 'http://localhost:4000'
   },
   production: {
-    // Update this URL to your actual backend deployment URL
-    apiUrl: 'https://your-backend-url.onrender.com' // or your actual backend URL
+    // ✅ Your actual Render backend URL
+    apiUrl: 'https://food-del-backend.onrender.com'
   }
 };
 

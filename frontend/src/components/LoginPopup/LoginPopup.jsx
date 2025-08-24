@@ -1,4 +1,4 @@
-import { useContext, useState } from 'react'
+import { useContext, useState, useEffect } from 'react'
 import './LoginPopup.css'
 import { assets } from '../../assets/assets'
 import { StoreContext } from '../../Context/StoreContext'
@@ -12,12 +12,30 @@ const LoginPopup = ({ setShowLogin }) => {
 
     const { setToken, url, loadCartData, setUserId, setFirebaseUser, setUserEmail } = useContext(StoreContext)
     const [currState, setCurrState] = useState("Sign Up");
+    const [allowedDomains, setAllowedDomains] = useState([]);
+    const [domainMessage, setDomainMessage] = useState("");
 
     const [data, setData] = useState({
         name: "",
         email: "",
         password: ""
     })
+
+    // Fetch allowed domains on component mount
+    useEffect(() => {
+        const fetchAllowedDomains = async () => {
+            try {
+                const response = await axios.get(url + "/api/user/allowed-domains");
+                if (response.data.success) {
+                    setAllowedDomains(response.data.domains);
+                    setDomainMessage(response.data.message);
+                }
+            } catch (error) {
+                console.error("Error fetching allowed domains:", error);
+            }
+        };
+        fetchAllowedDomains();
+    }, [url]);
 
     const onChangeHandler = (event) => {
         const name = event.target.name
@@ -108,6 +126,16 @@ const LoginPopup = ({ setShowLogin }) => {
                     <input name='email' onChange={onChangeHandler} value={data.email} type="email" placeholder='Your email' />
                     <input name='password' onChange={onChangeHandler} value={data.password} type="password" placeholder='Password' required />
                 </div>
+                {domainMessage && (
+                    <div className="domain-info">
+                        <p className="domain-message">{domainMessage}</p>
+                        {allowedDomains.length > 0 && (
+                            <div className="allowed-domains">
+                                <small>Allowed domains: {allowedDomains.join(', ')}</small>
+                            </div>
+                        )}
+                    </div>
+                )}
                 <button>{currState === "Login" ? "Login" : "Create account"}</button>
                 <button type="button" onClick={handleGoogleSignIn} className="google-signin-btn">
                     Sign in with Google
