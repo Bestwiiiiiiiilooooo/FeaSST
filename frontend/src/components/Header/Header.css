@@ -3,6 +3,7 @@
     margin: 30px auto;
     position: relative;
     overflow: hidden;
+    background-color: #f0f0f0; /* Fallback background color */
 }
 
 .header-background {
@@ -13,6 +14,17 @@
     top: 0;
     left: 0;
     z-index: 1;
+    display: block; /* Ensure image is displayed */
+    min-height: 100%; /* Ensure minimum height */
+}
+
+/* Debug styles - remove after fixing */
+.header-background:not([src]) {
+    background-color: #ff0000; /* Red background if no src */
+}
+
+.header-background[src=""] {
+    background-color: #00ff00; /* Green background if empty src */
 }
 .header-contents{
     position: absolute;

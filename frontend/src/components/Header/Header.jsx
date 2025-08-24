@@ -14,9 +14,17 @@ const Header = () => {
     return (
         <div className='header'>
             <img 
-                src="/header_banner.png" 
+                src="/Feasst_banner.png" 
                 alt="FeaSST Banner" 
                 className="header-background"
+                onError={(e) => {
+                    console.error('Banner image failed to load:', e.target.src);
+                    // Try alternative image
+                    e.target.src = "/header_banner.png";
+                }}
+                onLoad={() => {
+                    console.log('Banner image loaded successfully');
+                }}
             />
             <div className='header-contents'>
                 <h1>FeaSST - Order Your Favourite Food Here</h1>
