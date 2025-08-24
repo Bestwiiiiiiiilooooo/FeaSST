@@ -11,19 +11,38 @@ const Header = () => {
         }
     };
 
+    // Multiple image sources with fallbacks
+    const imageSources = [
+        '/header_banner.png',
+        '/Feasst_banner.png', 
+        '/header_img.png'
+    ];
+
+    const handleImageError = (e) => {
+        const currentSrc = e.target.src;
+        const currentIndex = imageSources.findIndex(src => currentSrc.includes(src.split('/').pop()));
+        
+        if (currentIndex < imageSources.length - 1) {
+            const nextImage = imageSources[currentIndex + 1];
+            console.log(`Trying next image: ${nextImage}`);
+            e.target.src = nextImage;
+        } else {
+            console.error('All banner images failed to load');
+            // Show a colored background as last resort
+            e.target.style.display = 'none';
+            e.target.parentElement.style.backgroundColor = '#4CAF50';
+        }
+    };
+
     return (
         <div className='header'>
             <img 
-                src="/Feasst_banner.png" 
+                src={imageSources[0]}
                 alt="FeaSST Banner" 
                 className="header-background"
-                onError={(e) => {
-                    console.error('Banner image failed to load:', e.target.src);
-                    // Try alternative image
-                    e.target.src = "/header_banner.png";
-                }}
-                onLoad={() => {
-                    console.log('Banner image loaded successfully');
+                onError={handleImageError}
+                onLoad={(e) => {
+                    console.log('Banner image loaded successfully:', e.target.src);
                 }}
             />
             <div className='header-contents'>
