@@ -15,13 +15,19 @@ const Header = () => {
     // Force image loading with immediate visual feedback
     const [imageLoaded, setImageLoaded] = useState(false);
     const [imageError, setImageError] = useState(false);
-    const [currentImageSrc, setCurrentImageSrc] = useState('/header_banner.png');
+    const [currentImageSrc, setCurrentImageSrc] = useState('/Feasst_banner.png');
+
+    // Add version and timestamp to force cache refresh
+    const version = '2.0.0';
+    const timestamp = Date.now();
+    const cacheBuster = `?v=${version}&t=${timestamp}`;
 
     // Test image loading on component mount
     useEffect(() => {
         console.log('🔍 Header component mounted, testing image loading...');
+        console.log('📦 Version:', version, 'Timestamp:', timestamp);
         
-        // Test if images are accessible
+        // Test if images are accessible with cache buster
         const testImage = new Image();
         testImage.onload = () => {
             console.log('✅ Test image loaded successfully:', testImage.src);
@@ -30,8 +36,8 @@ const Header = () => {
             console.log('❌ Test image failed to load:', testImage.src);
         };
         
-        // Test primary image
-        testImage.src = '/header_banner.png';
+        // Test primary image with cache buster
+        testImage.src = `/Feasst_banner.png${cacheBuster}`;
     }, []);
 
     const handleImageLoad = (e) => {
@@ -45,19 +51,19 @@ const Header = () => {
         console.error('❌ BANNER IMAGE FAILED:', e.target.src);
         setImageError(true);
         
-        // Try alternative images immediately
-        if (e.target.src.includes('header_banner.png')) {
-            console.log('🔄 Trying Feasst_banner.png...');
-            setCurrentImageSrc('/Feasst_banner.png');
-            e.target.src = '/Feasst_banner.png';
-        } else if (e.target.src.includes('Feasst_banner.png')) {
+        // Try alternative images immediately with cache buster
+        if (e.target.src.includes('Feasst_banner.png')) {
+            console.log('🔄 Trying header_banner.png...');
+            setCurrentImageSrc(`/header_banner.png${cacheBuster}`);
+            e.target.src = `/header_banner.png${cacheBuster}`;
+        } else if (e.target.src.includes('header_banner.png')) {
             console.log('🔄 Trying header_img.png...');
-            setCurrentImageSrc('/header_img.png');
-            e.target.src = '/header_img.png';
+            setCurrentImageSrc(`/header_img.png${cacheBuster}`);
+            e.target.src = `/header_img.png${cacheBuster}`;
         } else {
-            console.log('🔄 Trying header_banner.png as last resort...');
-            setCurrentImageSrc('/header_banner.png');
-            e.target.src = '/header_banner.png';
+            console.log('🔄 Trying Feasst_banner.png as last resort...');
+            setCurrentImageSrc(`/Feasst_banner.png${cacheBuster}`);
+            e.target.src = `/Feasst_banner.png${cacheBuster}`;
         }
     };
 
@@ -78,7 +84,8 @@ const Header = () => {
             }}>
                 🐛 Debug: {imageLoaded ? '✅ Loaded' : imageError ? '❌ Error' : '⏳ Loading'}<br/>
                 📍 Image: {currentImageSrc}<br/>
-                🎯 Status: {imageLoaded ? 'SUCCESS' : imageError ? 'FALLBACK' : 'LOADING'}
+                🎯 Status: {imageLoaded ? 'SUCCESS' : imageError ? 'FALLBACK' : 'LOADING'}<br/>
+                📦 Version: {version} | Time: {new Date(timestamp).toLocaleTimeString()}
             </div>
 
             {/* Show loading state */}
@@ -97,7 +104,7 @@ const Header = () => {
                     fontSize: '24px',
                     zIndex: 1
                 }}>
-                    🍕 Loading FeaSST Banner...
+                    🍕 Loading FeaSST Banner... (v{version})
                 </div>
             )}
             
@@ -117,12 +124,12 @@ const Header = () => {
                     fontSize: '24px',
                     zIndex: 1
                 }}>
-                    🚨 Banner Loading Failed - Using Fallback
+                    🚨 Banner Loading Failed - Using Fallback (v{version})
                 </div>
             )}
 
             <img 
-                src={currentImageSrc}
+                src={`${currentImageSrc}${cacheBuster}`}
                 alt="FeaSST Banner" 
                 className="header-background"
                 onError={handleImageError}
