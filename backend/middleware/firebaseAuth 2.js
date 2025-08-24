@@ -14,13 +14,11 @@ const serviceAccount = JSON.parse(
 
 const firebaseAuth = async (req, res, next) => {
   const authHeader = req.headers.authorization;
-  
+  console.log('Authorization header:', authHeader);
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
     return res.status(401).json({ message: "No token provided" });
   }
-  
   const idToken = authHeader.split(" ")[1];
-  
   // Try Firebase token first
   try {
     const decodedToken = await admin.auth().verifyIdToken(idToken);
@@ -29,22 +27,17 @@ const firebaseAuth = async (req, res, next) => {
   } catch (error) {
     // Not a valid Firebase token, try manual login token (JWT)
     try {
-      // Ensure JWT_SECRET is set
-      if (!process.env.JWT_SECRET) {
-        console.error('JWT_SECRET environment variable is not set');
-        return res.status(500).json({ message: "Server configuration error" });
-      }
-      
-      const decoded = jwt.verify(idToken, process.env.JWT_SECRET);
+      const decoded = jwt.verify(idToken, process.env.JWT_SECRET || 'your_jwt_secret');
+      console.log('Decoded JWT:', decoded);
       const user = await userModel.findById(decoded.userId);
-      
+      console.log('User found:', user);
       if (!user) {
-        return res.status(401).json({ message: "Invalid token" });
+        return res.status(401).json({ message: "Invalid manual login token: user not found" });
       }
-      
       req.user = { userId: user._id, email: user.email };
       return next();
     } catch (err) {
+      console.log('JWT verification error:', err);
       return res.status(401).json({ message: "Invalid token" });
     }
   }
