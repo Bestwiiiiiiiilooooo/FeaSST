@@ -34,13 +34,22 @@ const generalLimiter = rateLimit({
   legacyHeaders: false,
 });
 
-// middlewares
-app.use(express.json({ limit: '10mb' })); // Limit request body size
+// CORS middleware - MUST come before routes
 app.use(cors({
-  origin: process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(',') : ['http://localhost:3000'],
-  credentials: true
+  origin: [
+    'http://localhost:3000',
+    'http://localhost:5173',
+    'http://localhost:10000',
+    'https://feasst-food.web.app',
+    'https://feasst-food.firebaseapp.com'
+  ],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
+// Other middlewares
+app.use(express.json({ limit: '10mb' })); // Limit request body size
 // Apply rate limiting ONLY to specific endpoints that need protection
 app.use('/api/user/login', authLimiter);
 app.use('/api/user/register', authLimiter);
@@ -61,6 +70,24 @@ app.use('/api/menu', menuRouter);
 
 app.get('/', (req, res) => {
   res.send('API Working');
+});
+
+// Global error handler
+app.use((err, req, res, next) => {
+  console.error('Global error handler:', err);
+  res.status(500).json({ 
+    success: false, 
+    message: 'Internal server error',
+    error: process.env.NODE_ENV === 'development' ? err.message : 'Something went wrong'
+  });
+});
+
+// 404 handler for undefined routes
+app.use('*', (req, res) => {
+  res.status(404).json({ 
+    success: false, 
+    message: `Route ${req.originalUrl} not found` 
+  });
 });
 
 app.listen(port, () => console.log(`Server started on http://localhost:${port}`));

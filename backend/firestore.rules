@@ -1,0 +1,10 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Since this app uses MongoDB for data storage and not Firestore,
+    // we deny all access to Firestore collections
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+} 

@@ -118,14 +118,36 @@ const findOrCreateUser = async (req, res) => {
   const { firebaseUid, email, name } = req.body;
   
   try {
+    console.log('FindOrCreate request:', { firebaseUid, email, name });
+    
     if (!email) {
       return res.status(400).json({ success: false, message: "Email is required" });
     }
     
-    let user = await userModel.findOne({ firebaseUid });
-    if (!user) {
-      user = await userModel.create({ firebaseUid, email, name });
+    if (!firebaseUid) {
+      return res.status(400).json({ success: false, message: "Firebase UID is required" });
     }
+    
+    // First try to find by firebaseUid
+    let user = await userModel.findOne({ firebaseUid });
+    
+    if (!user) {
+      // If not found by firebaseUid, try to find by email
+      user = await userModel.findOne({ email });
+      
+      if (user) {
+        // Update existing user with firebaseUid
+        user.firebaseUid = firebaseUid;
+        await user.save();
+        console.log('Updated existing user with firebaseUid:', user._id);
+      } else {
+        // Create new user
+        user = await userModel.create({ firebaseUid, email, name: name || email.split('@')[0] });
+        console.log('Created new user:', user._id);
+      }
+    }
+    
+    console.log('User found/created successfully:', user._id);
     res.json({ success: true, userId: user._id });
   } catch (error) {
     console.error('FindOrCreate error:', error.message);
@@ -133,4 +155,20 @@ const findOrCreateUser = async (req, res) => {
   }
 };
 
-export {loginUser, registerUser, findOrCreateUser}
+// Get allowed domains for user registration
+const getAllowedDomains = async (req, res) => {
+  try {
+    // You can configure this based on your requirements
+    const allowedDomains = ['gmail.com', 'yahoo.com', 'outlook.com', 'hotmail.com'];
+    res.json({ 
+      success: true, 
+      domains: allowedDomains,
+      message: "Please use a valid email domain for registration."
+    });
+  } catch (error) {
+    console.error('GetAllowedDomains error:', error.message);
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+};
+
+export {loginUser, registerUser, findOrCreateUser, getAllowedDomains}

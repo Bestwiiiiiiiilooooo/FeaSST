@@ -80,7 +80,7 @@ const SideDishesPopup = ({ food, onClose, onAddToCart }) => {
                                     </div>
                                     <div className="checkbox">
                                         <img 
-                                            src={selectedSideDishes.find(sd => sd.name === sideDish.name) ? assets.checked : assets.un_checked} 
+                                            src={selectedSideDishes.find(sd => sd.name === sideDish.name) ? assets.checked : assets.checked} 
                                             alt="" 
                                         />
                                     </div>
