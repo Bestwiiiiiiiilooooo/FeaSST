@@ -1,0 +1,18 @@
+{
+  "projects": {
+    "default": "proj-serve"
+  },
+  "targets": {
+    "proj-serve": {
+      "hosting": {
+        "feasst-food": [
+          "feasst-food"
+        ],
+        "feasst-food-admin": [
+          "feasst-food-admin"
+        ]
+      }
+    }
+  },
+  "etags": {}
+}

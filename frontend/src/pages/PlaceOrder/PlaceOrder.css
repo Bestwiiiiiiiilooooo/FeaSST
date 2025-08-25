@@ -1,0 +1,252 @@
+.place-order{
+    display: flex;
+    align-items: start;
+    justify-content: space-between;
+    gap: 50px;
+    margin: 100px 0px;
+}
+.place-order-left{
+    width: 100%;
+    max-width: max(30%,500px);
+}
+.place-order-left .title{
+    font-size: 30px;
+    font-weight: 600;
+    margin-bottom: 50px;
+}
+.place-order-left input{
+    margin-bottom: 15px;
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #C5C5C5;
+    border-radius: 4px;
+    outline-color: tomato;
+}
+
+.place-order-left input[readonly] {
+    background-color: #f5f5f5;
+    color: #666;
+    cursor: not-allowed;
+    border-color: #ddd;
+}
+.place-order-left select {
+    margin-bottom: 15px;
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #C5C5C5;
+    border-radius: 4px;
+    outline-color: tomato;
+    background: white;
+    font-size: 16px;
+}
+
+.order-date-picker,
+.order-time-picker {
+    margin-bottom: 15px;
+}
+
+.order-date-picker p,
+.order-time-picker p {
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: #333;
+}
+
+.order-date-picker input,
+.order-time-picker input {
+    margin-bottom: 5px;
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #C5C5C5;
+    border-radius: 4px;
+    outline-color: tomato;
+    font-size: 16px;
+}
+
+.order-time-picker small {
+    color: #666;
+    font-size: 12px;
+    display: block;
+    margin-top: 2px;
+}
+.place-order-left .multi-field{
+    display: flex;
+    gap: 10px;
+}
+.place-order-right{
+    width: 100%;
+    max-width: max(50%,600px);
+}
+.place-order-submit{
+    margin-top: 50px;
+    border: none;
+    background-color: tomato;
+    color: white;
+    padding: 12px 30px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+.payment{
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+    gap: 15px;
+}
+.payment h2{
+    margin-top: 30px;
+    margin-bottom: 20px;
+}
+.payment .payment-option{
+    display: flex;
+    align-items: center;
+    gap: 10px ;
+    border: 1px solid tomato;
+    padding: 15px;
+    border-radius: 4px;
+    min-width: 300px;
+    cursor: pointer;
+}
+.payment .payment-option:hover{
+    background-color:  #ffe7de;
+}
+
+/* Cart total section styling */
+.cart-total {
+    width: 100%;
+    min-width: 300px;
+}
+
+.cart-total h2 {
+    margin-bottom: 20px;
+    font-size: 24px;
+}
+
+.cart-total-details {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    font-size: 16px;
+}
+
+.cart-total-details p {
+    margin: 0;
+    word-wrap: break-word;
+    max-width: 60%;
+}
+
+.cart-total-details b {
+    font-weight: 600;
+}
+
+/* Side dishes specific styling for checkout */
+.order-items-list {
+    margin: 15px 0;
+    padding: 12px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+}
+
+.order-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 10px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #eee;
+    gap: 20px;
+}
+
+.order-item:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+}
+
+.order-item-details {
+    flex: 1;
+    min-width: 0;
+    margin-right: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.order-item-name {
+    font-weight: bold;
+    font-size: 16px;
+    margin-bottom: 2px;
+    color: #333;
+}
+
+.order-item-side-dishes {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-top: 2px;
+}
+
+.order-item-side-dishes-label {
+    font-size: 11px;
+    color: #666;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.order-item-side-dish {
+    background-color: #e8f5e8;
+    color: #2e7d32;
+    padding: 1px 4px;
+    border-radius: 2px;
+    font-size: 10px;
+    display: inline-block;
+    border: 1px solid #4caf50;
+    white-space: nowrap;
+}
+
+.order-item-price {
+    font-weight: bold;
+    font-size: 16px;
+    color: #ff4c24;
+    text-align: right;
+    min-width: 60px;
+    flex-shrink: 0;
+}
+
+.order-item-quantity {
+    font-size: 14px;
+    color: #666;
+    margin-left: 10px;
+}
+
+@media (max-width:700px) {
+    .place-order{
+        flex-direction: column;
+    }
+    
+    .place-order-right {
+        max-width: 100%;
+    }
+    
+    .cart-total {
+        min-width: auto;
+    }
+    
+    .order-item {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .order-item-price {
+        text-align: left;
+        margin-top: 10px;
+    }
+    
+    .order-item-side-dish {
+        font-size: 11px;
+        padding: 3px 6px;
+        margin-right: 6px;
+        margin-bottom: 3px;
+    }
+}
