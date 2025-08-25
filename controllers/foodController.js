@@ -10,12 +10,10 @@ const listFood = async (req, res) => {
         console.log(error);
         res.json({ success: false, message: "Error" })
     }
-
 }
 
 // add food
 const addFood = async (req, res) => {
-
     try {
         let image_filename = `${req.file.filename}`
 
@@ -38,7 +36,7 @@ const addFood = async (req, res) => {
             name: req.body.name,
             description: req.body.description,
             price: req.body.price,
-            category:req.body.category,
+            category: req.body.category,
             image: image_filename,
             promoCode: req.body.promoCode,
             promoDiscount: req.body.promoDiscount,
@@ -57,7 +55,6 @@ const addFood = async (req, res) => {
 // delete food
 const removeFood = async (req, res) => {
     try {
-
         const food = await foodModel.findById(req.body.id);
         fs.unlink(`uploads/${food.image}`, () => { })
 
@@ -68,7 +65,6 @@ const removeFood = async (req, res) => {
         console.log(error);
         res.json({ success: false, message: "Error" })
     }
-
 }
 
 // toggle food availability
@@ -81,7 +77,7 @@ const toggleAvailability = async (req, res) => {
 
         const newAvailability = !food.isAvailable;
         await foodModel.findByIdAndUpdate(req.body.id, { isAvailable: newAvailability });
-        
+
         const status = newAvailability ? "Available" : "Sold Out";
         res.json({ success: true, message: `Food marked as ${status}` });
 
