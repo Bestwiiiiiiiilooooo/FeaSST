@@ -68,6 +68,13 @@ app.use('/api/cart', cartRouter);
 app.use('/api/order', orderRouter);
 app.use('/api/menu', menuRouter);
 
+// Add debugging middleware to log all requests
+app.use((req, res, next) => {
+  console.log(`🚨 REQUEST LOG: ${req.method} ${req.originalUrl}`);
+  console.log(`🚨 REQUEST LOG: Headers:`, req.headers);
+  next();
+});
+
 app.get('/', (req, res) => {
   res.send('API Working');
 });

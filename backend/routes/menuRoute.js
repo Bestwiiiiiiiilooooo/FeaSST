@@ -14,9 +14,10 @@ const menu_list = [
 ];
 
 router.get('/list', (req, res) => {
-  console.log('🚨 Menu route hit: /api/menu/list');
-  console.log('🚨 Request URL:', req.originalUrl);
-  console.log('🚨 Request method:', req.method);
+  console.log('🚨 MENU ROUTE HIT: /api/menu/list');
+  console.log('🚨 MENU ROUTE: Request method:', req.method);
+  console.log('🚨 MENU ROUTE: Request URL:', req.originalUrl);
+  console.log('🚨 MENU ROUTE: Sending response with', menu_list.length, 'items');
   res.json({ 
     success: true,
     data: menu_list,
