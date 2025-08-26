@@ -1,0 +1,52 @@
+const translations = {
+  en: {
+    addItem: "Add Items",
+    listItems: "List Items",
+    orders: "Orders",
+    collection: "Collection",
+    orderPage: "Order Page",
+    clearAllOrders: "Clear All Orders",
+    filterByStall: "Filter by Stall:",
+    orderNo: "Order No:",
+    items: "Items",
+    price: "Price",
+    quantity: "Quantity",
+    total: "Total",
+    remove: "Remove",
+    cartTotals: "Cart Totals",
+    subtotal: "Subtotal",
+    proceedToCheckout: "PROCEED TO CHECKOUT",
+    clearCart: "CLEAR CART",
+    promoCodePrompt: "If you have a promo code, Enter it here",
+    submit: "Submit",
+    valid: "Valid",
+    notValid: "Not valid",
+    // ...add more as needed
+  },
+  zh: {
+    addItem: "添加商品",
+    listItems: "商品列表",
+    orders: "订单",
+    collection: "取货",
+    orderPage: "订单页面",
+    clearAllOrders: "清除所有订单",
+    filterByStall: "按店铺筛选:",
+    orderNo: "订单号:",
+    items: "商品",
+    price: "价格",
+    quantity: "数量",
+    total: "总计",
+    remove: "移除",
+    cartTotals: "购物车总计",
+    subtotal: "小计",
+    proceedToCheckout: "去结账",
+    clearCart: "清空购物车",
+    promoCodePrompt: "如果你有优惠码，请在此输入",
+    submit: "提交",
+    valid: "有效",
+    notValid: "无效",
+    // ...add more as needed
+  }
+};
+
+export default translations; 

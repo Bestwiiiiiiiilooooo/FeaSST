@@ -1,10 +1,12 @@
 .login-popup{
-    position: absolute;
-    z-index: 1;
+    position: fixed;
+    z-index: 1000;
     width: 100%;
     height: 100%;
     background-color: #00000090;
     display: grid;
+    top: 0;
+    left: 0;
 }
 .login-popup-container{
     place-self: center;
@@ -65,4 +67,31 @@
     color: #FF4C24;
     font-weight: 500;
     cursor: pointer;
+}
+
+.google-signin-btn {
+    background-color: #4285f4;
+    color: white;
+    border: none;
+    padding: 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    margin-top: 10px;
+    width: 100%;
+}
+
+.google-signin-btn:hover {
+    background-color: #357abd;
+}
+
+.forgot-password {
+    color: #FF4C24;
+    cursor: pointer;
+    text-align: center;
+    margin-top: 10px;
+}
+
+.forgot-password:hover {
+    text-decoration: underline;
 }
