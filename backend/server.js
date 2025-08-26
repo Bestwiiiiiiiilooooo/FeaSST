@@ -66,15 +66,24 @@ app.use('/api/cart', generalLimiter); // Only protect cart routes
 app.use('/api/order', generalLimiter); // Only protect order routes
 
 // db connection
+console.log('🚨 SERVER: Connecting to database...');
 connectDB();
 
 // api endpoints (no rate limiting on menu and food routes)
+console.log('🚨 SERVER: Registering API routes...');
 app.use('/api/user', userRouter);
+console.log('🚨 SERVER: User routes registered');
 app.use('/api/food', foodRouter);
+console.log('🚨 SERVER: Food routes registered');
 app.use('/images', express.static('uploads'));
+console.log('🚨 SERVER: Static images route registered');
 app.use('/api/cart', cartRouter);
+console.log('🚨 SERVER: Cart routes registered');
 app.use('/api/order', orderRouter);
+console.log('🚨 SERVER: Order routes registered');
 app.use('/api/menu', menuRouter);
+console.log('🚨 SERVER: Menu routes registered');
+console.log('🚨 SERVER: All routes registered successfully!');
 
 app.get('/', (req, res) => {
   res.send('API Working');

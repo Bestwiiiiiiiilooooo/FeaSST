@@ -1,0 +1,231 @@
+.side-dishes-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    backdrop-filter: blur(2px);
+}
+
+.side-dishes-popup {
+    background: white;
+    border-radius: 12px;
+    padding: 24px;
+    max-width: 500px;
+    width: 90%;
+    max-height: 80vh;
+    overflow-y: auto;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    transform: translateZ(0);
+    will-change: transform;
+}
+
+.popup-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #eee;
+}
+
+.popup-header h2 {
+    margin: 0;
+    color: #333;
+    font-size: 1.5rem;
+}
+
+.close-btn {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: #666;
+    padding: 0;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: background-color 0.2s;
+}
+
+.close-btn:hover {
+    background-color: #f0f0f0;
+}
+
+.food-details {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #eee;
+}
+
+.food-details img {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    border-radius: 8px;
+}
+
+.food-info {
+    flex: 1;
+}
+
+.food-info .description {
+    color: #666;
+    margin: 5px 0;
+    font-size: 0.9rem;
+}
+
+.food-info .base-price {
+    font-weight: bold;
+    color: #333;
+    margin: 5px 0 0 0;
+}
+
+.side-dishes-section h3 {
+    margin: 0 0 15px 0;
+    color: #333;
+    font-size: 1.1rem;
+}
+
+.side-dishes-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.side-dish-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px;
+    border: 2px solid #eee;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+}
+
+.side-dish-item:hover {
+    border-color: #ddd;
+    background-color: #f9f9f9;
+}
+
+.side-dish-item.selected {
+    border-color: #4CAF50;
+    background-color: #f0f8f0;
+}
+
+.side-dish-info {
+    flex: 1;
+}
+
+.side-dish-info h4 {
+    margin: 0 0 5px 0;
+    color: #333;
+    font-size: 1rem;
+}
+
+.side-dish-info p {
+    margin: 0 0 5px 0;
+    color: #666;
+    font-size: 0.85rem;
+}
+
+.side-dish-price {
+    font-weight: bold;
+    color: #4CAF50;
+    font-size: 0.9rem;
+}
+
+.checkbox {
+    margin-left: 10px;
+}
+
+.checkbox img {
+    width: 20px;
+    height: 20px;
+}
+
+.no-side-dishes {
+    text-align: center;
+    padding: 20px;
+    color: #666;
+    font-style: italic;
+}
+
+.popup-footer {
+    margin-top: 20px;
+    padding-top: 15px;
+    border-top: 1px solid #eee;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.total-price {
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: #333;
+}
+
+.add-to-cart-btn {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 500;
+    transition: background-color 0.2s;
+}
+
+.add-to-cart-btn:hover {
+    background-color: #45a049;
+}
+
+.add-to-cart-btn:active {
+    transform: translateY(1px);
+}
+
+/* Responsive design */
+@media (max-width: 600px) {
+    .side-dishes-popup {
+        width: 95%;
+        padding: 16px;
+        margin: 10px;
+    }
+    
+    .food-details {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .food-details img {
+        width: 100px;
+        height: 100px;
+        margin: 0 auto;
+    }
+    
+    .popup-footer {
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    .add-to-cart-btn {
+        width: 100%;
+    }
+} 
