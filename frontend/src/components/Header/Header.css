@@ -1,9 +1,11 @@
 .header{
-    height: 34vw;
+    height: 500px;
     margin: 30px auto;
     position: relative;
     overflow: hidden;
     background-color: #f0f0f0; /* Fallback background color */
+    padding: 0;
+    box-sizing: border-box;
 }
 
 .header-background {
@@ -13,70 +15,71 @@
     position: absolute;
     top: 0;
     left: 0;
-    z-index: 1;
+    z-index: 0;
     display: block; /* Ensure image is displayed */
-    min-height: 100%; /* Ensure minimum height */
 }
 
-/* Debug styles - remove after fixing */
-.header-background:not([src]) {
-    background-color: #ff0000; /* Red background if no src */
-}
 
-.header-background[src=""] {
-    background-color: #00ff00; /* Green background if empty src */
-}
 .header-contents{
     position: absolute;
     display: flex;
     flex-direction: column;
     align-items: start;
-    gap: 1.5vw;
+    gap: 20px;
     max-width: 50%;
-    bottom: 10%;
-    left: 6vw;
+    bottom: 40px;
+    left: 60px;
     animation: fadeIn 3s;
-    z-index: 2;
+    z-index: 1;
 }
 .header-contents h1{
     font-weight:500;
     color: white;
-    font-size: max(4.5vw,22px);
+    font-size: 36px;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.7);
 }
 .header-contents h2{
     font-weight:500;
     color: white;
-    font-size: max(4.5vw,22px);
+    font-size: 36px;
 }
 .header-contents p{
     color: white;
-    font-size: 1vw;
+    font-size: 16px;
+    line-height: 1.5;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.7);
 }
 .header-contents button{
     border: none;
     color: #747474;
     font-weight: 500;
-    padding: 1vw 2.3vw;
+    padding: 15px 30px;
     background: white;
-    font-size: max(1vw,13px);
+    font-size: 16px;
     border-radius: 50px;
 }
 @media (max-width:1050px) {
     .header{
-        height: 38vw;
+        height: 550px;
     }
     .header-contents{
         max-width: 45%;
+        bottom: 50px;
     }
 }
 @media(max-width:750px){
+    .header{
+        height: 400px;
+    }
     .header-contents{
         max-width: 55%;
+        bottom: 30px;
+        left: 30px;
     }
     .header-contents p{
        display: none;
     }
     .header-contents button{
-        padding: 2vw 4vw;
+        padding: 15px 30px;
     }
 }

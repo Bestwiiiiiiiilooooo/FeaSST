@@ -13,8 +13,8 @@ const Header = () => {
 
     // Simple cache busting - just use timestamp to prevent browser caching
     const timestamp = Date.now();
-    const primaryBanner = `/Feasst_banner.png?t=${timestamp}`;
-    const fallbackBanner = `/header_banner.png?t=${timestamp}`;
+    const primaryBanner = `/Feasst_banner2.png?t=${timestamp}`;
+    const fallbackBanner = `/Feasst_banner.png?t=${timestamp}`;
 
     return (
         <div className='header'>
@@ -28,13 +28,10 @@ const Header = () => {
                     console.log('🔄 Trying fallback banner...');
                     e.target.src = fallbackBanner;
                 }}
-                onLoad={() => {
+                onLoad={(e) => {
                     console.log('✅ Primary banner loaded successfully:', e.target.src);
                 }}
-                style={{
-                    border: '2px solid red', // Debug border to see if image is there
-                    backgroundColor: 'rgba(255, 0, 0, 0.1)' // Debug background
-                }}
+
             />
             
             <div className='header-contents'>

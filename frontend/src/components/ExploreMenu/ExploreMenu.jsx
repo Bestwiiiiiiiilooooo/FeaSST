@@ -1,7 +1,8 @@
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback, useContext } from 'react'
 import './ExploreMenu.css'
 import { assets } from '../../assets/assets'
 import PropTypes from 'prop-types'
+import { StoreContext } from '../../Context/StoreContext'
 
 const imageMap = {
   'menu_1.png': assets.menu_1,
@@ -16,27 +17,40 @@ const imageMap = {
 
 const ExploreMenu = ({category,setCategory}) => {
   const [menuList, setMenuList] = useState([]);
-
-  // Environment-based URL configuration
-  const getApiUrl = () => {
-    if (import.meta.env.VITE_API_URL) {
-      return import.meta.env.VITE_API_URL;
-    }
-    // Default to localhost for development
-    return "http://localhost:4000";
-  };
-
-  const url = getApiUrl();
+  const { url } = useContext(StoreContext);
 
   const fetchMenu = useCallback(async () => {
     try {
-      console.log('ExploreMenu - Fetching menu from:', url + "/api/menu/list");
-      const response = await fetch(url + "/api/menu/list");
+      const apiUrl = url + "/api/menu/list";
+      console.log('ExploreMenu - Fetching menu from:', apiUrl);
+      const response = await fetch(apiUrl);
+      console.log('ExploreMenu - Response status:', response.status);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const contentType = response.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+        throw new Error(`Expected JSON but got ${contentType}`);
+      }
+      
       const data = await response.json();
       console.log('ExploreMenu - Menu response:', data);
       setMenuList(data.data || []);
     } catch (error) {
       console.error('ExploreMenu - Error fetching menu:', error);
+      // Fallback to static menu if API fails
+      setMenuList([
+        { menu_name: 'Store 1', menu_image: 'menu_1.png' },
+        { menu_name: 'Store 2', menu_image: 'menu_2.png' },
+        { menu_name: 'Store 3', menu_image: 'menu_3.png' },
+        { menu_name: 'Store 4', menu_image: 'menu_4.png' },
+        { menu_name: 'Store 5', menu_image: 'menu_5.png' },
+        { menu_name: 'Store 6', menu_image: 'menu_6.png' },
+        { menu_name: 'Store 7', menu_image: 'menu_7.png' },
+        { menu_name: 'Store 8', menu_image: 'menu_8.png' },
+      ]);
     }
   }, [url]);
 
