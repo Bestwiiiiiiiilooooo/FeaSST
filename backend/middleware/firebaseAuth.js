@@ -1,4 +1,4 @@
-import admin from "../config/firebaseAdmin.js";
+import admin from "../firebase-config.js";
 import userModel from "../models/userModel.js";
 import jwt from "jsonwebtoken";
 import { fileURLToPath } from 'url';
