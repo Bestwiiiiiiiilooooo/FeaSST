@@ -41,7 +41,8 @@ app.use(cors({
     'http://localhost:5173',
     'http://localhost:10000',
     'https://feasst-food.web.app',
-    'https://feasst-food.firebaseapp.com'
+    'https://feasst-food.firebaseapp.com',
+    'https://feasst-food-admin.web.app'  // Admin panel domain
   ],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
