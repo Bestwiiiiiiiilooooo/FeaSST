@@ -1,5 +1,8 @@
 import admin from "firebase-admin";
 
+console.log("Firebase Admin config starting...");
+console.log("FIREBASE_PROJECT_ID:", process.env.FIREBASE_PROJECT_ID ? "SET" : "NOT SET");
+
 let serviceAccount;
 
 // Check if we're in production (Render) and use environment variables
@@ -19,6 +22,7 @@ if (process.env.FIREBASE_PROJECT_ID) {
     client_x509_cert_url: process.env.FIREBASE_CLIENT_X509_CERT_URL,
     universe_domain: "googleapis.com"
   };
+  console.log("Service account created from environment variables");
 } else {
   console.log("Environment variables not found, attempting to read firebaseAdmin.json");
   // Use local JSON file for development
@@ -29,6 +33,7 @@ if (process.env.FIREBASE_PROJECT_ID) {
     const __filename = fileURLToPath(import.meta.url);
     const __dirname = path.dirname(__filename);
     const configPath = path.join(__dirname, "firebaseAdmin.json");
+    console.log("Attempting to read file:", configPath);
     serviceAccount = JSON.parse(fs.readFileSync(configPath, 'utf8'));
     console.log("Successfully loaded firebaseAdmin.json");
   } catch (error) {
@@ -38,8 +43,10 @@ if (process.env.FIREBASE_PROJECT_ID) {
   }
 }
 
+console.log("Initializing Firebase Admin...");
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
 });
+console.log("Firebase Admin initialized successfully");
 
 export default admin;
