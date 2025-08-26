@@ -4,6 +4,7 @@ let serviceAccount;
 
 // Check if we're in production (Render) and use environment variables
 if (process.env.FIREBASE_PROJECT_ID) {
+  console.log("Using Firebase Admin with environment variables");
   // Use environment variables for production deployment
   serviceAccount = {
     type: "service_account",
@@ -19,12 +20,17 @@ if (process.env.FIREBASE_PROJECT_ID) {
     universe_domain: "googleapis.com"
   };
 } else {
+  console.log("Environment variables not found, attempting to read firebaseAdmin.json");
   // Use local JSON file for development
   try {
     const fs = await import("fs");
-    serviceAccount = JSON.parse(
-      fs.readFileSync(new URL("./firebaseAdmin.json", import.meta.url))
-    );
+    const path = await import("path");
+    const { fileURLToPath } = await import("url");
+    const __filename = fileURLToPath(import.meta.url);
+    const __dirname = path.dirname(__filename);
+    const configPath = path.join(__dirname, "firebaseAdmin.json");
+    serviceAccount = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+    console.log("Successfully loaded firebaseAdmin.json");
   } catch (error) {
     console.error("Error loading Firebase Admin credentials:", error.message);
     console.error("Please ensure firebaseAdmin.json exists or set environment variables");
