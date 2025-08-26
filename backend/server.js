@@ -12,7 +12,7 @@ import menuRouter from './routes/menuRoute.js';
 
 // app config
 const app = express();
-const port = process.env.PORT || 4000;
+const port = process.env.PORT || 10000;
 
 // Security middleware
 app.use(helmet());
@@ -97,4 +97,9 @@ app.use('*', (req, res) => {
   });
 });
 
-app.listen(port, () => console.log(`Server started on http://localhost:${port}`));
+app.listen(port, () => {
+  console.log(`🚨 SERVER: Starting on port ${port}`);
+  console.log(`🚨 SERVER: Environment: ${process.env.NODE_ENV}`);
+  console.log(`🚨 SERVER: Render: ${process.env.RENDER ? 'YES' : 'NO'}`);
+  console.log(`🚨 SERVER: Available at: http://localhost:${port}`);
+});
