@@ -7,7 +7,7 @@ const config = {
   },
   production: {
     // ✅ Your actual Render backend URL
-    apiUrl: 'https://food-del-backend.onrender.com'
+    apiUrl: 'https://feasst-9pe1.onrender.com'
   }
 };
 
