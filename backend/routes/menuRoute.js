@@ -14,7 +14,14 @@ const menu_list = [
 ];
 
 router.get('/list', (req, res) => {
-  res.json({ data: menu_list });
+  console.log('🚨 Menu route hit: /api/menu/list');
+  console.log('🚨 Request URL:', req.originalUrl);
+  console.log('🚨 Request method:', req.method);
+  res.json({ 
+    success: true,
+    data: menu_list,
+    message: 'Menu data retrieved successfully'
+  });
 });
 
 export default router; 
