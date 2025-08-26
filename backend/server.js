@@ -50,6 +50,14 @@ app.use(cors({
 
 // Other middlewares
 app.use(express.json({ limit: '10mb' })); // Limit request body size
+
+// Add debugging middleware to log all requests BEFORE routes
+app.use((req, res, next) => {
+  console.log(`🚨 REQUEST LOG: ${req.method} ${req.originalUrl}`);
+  console.log(`🚨 REQUEST LOG: Headers:`, req.headers);
+  next();
+});
+
 // Apply rate limiting ONLY to specific endpoints that need protection
 app.use('/api/user/login', authLimiter);
 app.use('/api/user/register', authLimiter);
@@ -67,13 +75,6 @@ app.use('/images', express.static('uploads'));
 app.use('/api/cart', cartRouter);
 app.use('/api/order', orderRouter);
 app.use('/api/menu', menuRouter);
-
-// Add debugging middleware to log all requests
-app.use((req, res, next) => {
-  console.log(`🚨 REQUEST LOG: ${req.method} ${req.originalUrl}`);
-  console.log(`🚨 REQUEST LOG: Headers:`, req.headers);
-  next();
-});
 
 app.get('/', (req, res) => {
   res.send('API Working');
